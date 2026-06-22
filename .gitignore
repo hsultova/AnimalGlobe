@@ -113,9 +113,27 @@ dist-ssr
 *.sln
 *.sw?
 
+# ignore appsettings configuration files
+**/appsettings.Development.json
+**/appsettings.Staging.json
+**/appsettings.Production.json
+
 
 ## Packaging
 *.nupkg
 *.snupkg
 server/Api.csproj.user
 server/Api.csproj.user
+
+# Database and storage files
+*.sqlite
+*.sqlite3
+*.db
+*.mdf
+*.ldf
+*.ndf
+dump.rdb
+server/animalglobe.db
+.gitignore
+server/animalglobe.db-shm
+server/animalglobe.db-wal
