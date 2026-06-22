@@ -64,6 +64,8 @@ nunit-*.xml
 *.user
 *.userosscache
 *.sln.docstates
+*.csproj.user
+*.user
 
 ## OS files
 .DS_Store
@@ -115,3 +117,5 @@ dist-ssr
 ## Packaging
 *.nupkg
 *.snupkg
+server/Api.csproj.user
+server/Api.csproj.user

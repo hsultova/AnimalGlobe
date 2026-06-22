@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api': { target: 'https://localhost:5125/', changeOrigin: true, secure: false },
+      '/api': { target: 'https://localhost:7145/', changeOrigin: true, secure: false },
     }
   }
 })
