@@ -10,9 +10,9 @@ public class AnimalViewModel
 	public AnimalGroup Group { get; set; }
 	public string ShortFact { get; set; } = "";
 
-	public double? Latitude { get; set; }
-	public double? Longitude { get; set; }
-	public string? PlaceLabel { get; set; }
+	public double Latitude { get; set; }
+	public double Longitude { get; set; }
+	public string PlaceLabel { get; set; } = "";
 
 	public string? PhotoUrl { get; set; }
 	public string? PhotoAttribution { get; set; }

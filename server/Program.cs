@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Api.Data;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -14,12 +15,61 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(options =>
 	options.UseSqlite(builder.Configuration.GetConnectionString("Default")));
 
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+	options.Password.RequireNonAlphanumeric = false;
+})
+	.AddEntityFrameworkStores<AppDbContext>()
+	.AddDefaultTokenProviders();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+	options.Cookie.Name = "AnimalGlobe.AuthCookie";
+	options.Cookie.HttpOnly = true;
+	options.ExpireTimeSpan = TimeSpan.FromHours(8);
+	options.SlidingExpiration = true;
+
+	// API behaviour: don't redirect, just answer with a status code
+	options.Events.OnRedirectToLogin = ctx => { ctx.Response.StatusCode = 401; return Task.CompletedTask; };
+	options.Events.OnRedirectToAccessDenied = ctx => { ctx.Response.StatusCode = 403; return Task.CompletedTask; };
+});
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
+
 using (var scope = app.Services.CreateScope())
 {
+	var services = scope.ServiceProvider;
+
+	// create the single admin if it doesn't exist
+	var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+	const string adminEmail = "admin@animalglobe.local";
+	if (await userManager.FindByEmailAsync(adminEmail) is null)
+	{
+		var admin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+		await userManager.CreateAsync(admin, "Admin123!");
+	}
 	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-	db.Database.Migrate();   // applies any pending migrations automatically
-	DbSeeder.Seed(db);       // inserts the animals if the table is empty
+	// Apply migrations but don't let a stuck migration block startup indefinitely.
+	try
+	{
+		var migrateTask = Task.Run(() => db.Database.Migrate());
+		if (!migrateTask.Wait(TimeSpan.FromSeconds(10)))
+		{
+			var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+			logger.LogWarning("Database migration timed out after 10s; continuing without applying migrations.");
+		}
+		else
+		{
+			DbSeeder.Seed(db); // inserts the animals if the table is empty
+		}
+	}
+	catch (Exception ex)
+	{
+		var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+		logger.LogError(ex, "Exception while applying migrations or seeding database");
+	}
 }
 
 // Configure the HTTP request pipeline.
@@ -32,6 +82,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
