@@ -24,7 +24,7 @@ export default function AnimalCard({ animal, onClose }: Props) {
                 {animal.photoUrl && <img src={animal.photoUrl} alt={animal.commonName} />}
                 <h2>{animal.commonName}</h2>
                 <p className="fact">{animal.shortFact}</p>
-                {animal.placelabel && <p className="placelabel">{animal.placelabel}</p>}
+                {animal.placeLabel && <p className="placelabel">{animal.placeLabel}</p>}
 
                 {animal.soundUrl ? (<>
                     <button className="play-button" onClick={playSound}>

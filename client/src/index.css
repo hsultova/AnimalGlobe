@@ -1,5 +1,5 @@
 * { box-sizing: border-box; }
-html, body, #root { margin: 0; height: 100%; background: #0b1026; overflow: hidden; }
+html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidden; }
 
 .overlay {
   position: fixed; inset: 0; display: grid; place-items: center;
@@ -20,3 +20,8 @@ html, body, #root { margin: 0; height: 100%; background: #0b1026; overflow: hidd
   border: none; border-radius: 999px; background: #ffcc00; cursor: pointer;
 }
 .credit { font-size: 0.75rem; color: #888; margin-top: 12px; }
+:root { font-family: system-ui, sans-serif; }
+
+table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #ddd; }
+td button, td a { margin-right: .5rem; }
