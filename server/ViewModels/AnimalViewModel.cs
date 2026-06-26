@@ -17,5 +17,6 @@ public class AnimalViewModel
 	public string? PhotoUrl { get; set; }
 	public string? PhotoAttribution { get; set; }
 	public string? SoundUrl { get; set; }
-	public string? SoundAttribution { get; set; }
+    public string? SoundAttribution { get; set; }
+    public bool IsPublished { get; set; }
 }

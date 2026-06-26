@@ -1,10 +1,10 @@
-﻿using Api.Data;
+﻿using System.Linq.Expressions;
+using Api.Data;
 using Api.Models;
 using Api.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Api.Controllers;
 
@@ -28,8 +28,9 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 		PhotoUrl = a.Media.Where(m => m.Kind == MediaKind.Photo).Select(m => m.Url).FirstOrDefault(),
 		PhotoAttribution = a.Media.Where(m => m.Kind == MediaKind.Photo).Select(m => m.Attribution).FirstOrDefault(),
 		SoundUrl = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Url).FirstOrDefault(),
-		SoundAttribution = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Attribution).FirstOrDefault(),
-	};
+        SoundAttribution = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Attribution).FirstOrDefault(),
+        IsPublished = a.IsPublished
+    };
 
 	// GET: api/animals — only published animals, for public consumption
 	[HttpGet]
