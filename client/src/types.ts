@@ -52,11 +52,6 @@ export interface SoundPreview {
   sourceRef: string
 }
 
-export interface ImportSearchResult {
-  photos: PhotoPreview[]
-  sound: SoundPreview | null
-}
-
 export interface ImportRequest {
   commonName: string
   scientificName: string

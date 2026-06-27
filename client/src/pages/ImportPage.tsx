@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { searchImport, importAnimal } from '../api/import'
-import type { ImportSearchResult, PhotoPreview, SoundPreview } from '../types'
+import { searchImport, fetchSound, importAnimal } from '../api/import'
+import type { PhotoPreview, SoundPreview } from '../types'
 
 export default function ImportPage() {
   const [name, setName] = useState('')
-  const [result, setResult] = useState<ImportSearchResult | null>(null)
+  const [photos, setPhotos] = useState<PhotoPreview[] | null>(null)
+  const [sound, setSound] = useState<SoundPreview | null>(null)
   const [loading, setLoading] = useState(false)
+  const [soundLoading, setSoundLoading] = useState(false)
   const [importingRef, setImportingRef] = useState<string | null>(null)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -16,9 +18,19 @@ export default function ImportPage() {
     if (!name.trim()) return
     setError('')
     setLoading(true)
-    setResult(null)
+    setPhotos(null)
+    setSound(null)
     try {
-      setResult(await searchImport(name.trim()))
+      const found = await searchImport(name.trim())
+      setPhotos(found)
+
+      // Load the optional sound in the background so the photo grid never waits on it.
+      const scientificName = found.find((p) => p.scientificName)?.scientificName ?? name.trim()
+      setSoundLoading(true)
+      fetchSound(scientificName)
+        .then(setSound)
+        .catch(() => setSound(null))
+        .finally(() => setSoundLoading(false))
     } catch {
       setError('Search failed.')
     } finally {
@@ -55,7 +67,10 @@ export default function ImportPage() {
   }
 
   return (
-    <div style={{ maxWidth: 900, margin: '40px auto', fontFamily: 'system-ui' }}>
+    // The global `overflow: hidden` (for the 3D globe) blocks page scroll, so
+    // this page owns its own scroll container.
+    <div style={{ height: '100vh', overflowY: 'auto' }}>
+    <div style={{ maxWidth: 900, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>Import from API</h1>
         <button onClick={() => navigate('/animals')}>Back to animals</button>
@@ -73,22 +88,24 @@ export default function ImportPage() {
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
 
-      {result && (
+      {photos && (
         <>
-          {result.sound ? (
+          {soundLoading ? (
+            <p style={{ color: '#666' }}>Loading sound…</p>
+          ) : sound ? (
             <div style={{ margin: '8px 0 20px' }}>
-              <strong>Sound</strong> — {result.sound.attribution}
-              <audio controls src={result.sound.url} style={{ display: 'block', marginTop: 6, width: '100%' }} />
+              <strong>Sound</strong> — {sound.attribution}
+              <audio controls src={sound.url} style={{ display: 'block', marginTop: 6, width: '100%' }} />
             </div>
           ) : (
             <p style={{ color: '#666' }}>No sound recording available for this species.</p>
           )}
 
-          {result.photos.length === 0 ? (
+          {photos.length === 0 ? (
             <p style={{ color: '#666' }}>No photos found. Try another name.</p>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
-              {result.photos.map((photo) => (
+              {photos.map((photo) => (
                 <div key={photo.sourceRef} style={{ border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden' }}>
                   <img src={photo.thumbnailUrl} alt={photo.commonName} style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                   <div style={{ padding: 10 }}>
@@ -97,7 +114,7 @@ export default function ImportPage() {
                     <div style={{ fontSize: 12, color: '#777', margin: '4px 0' }}>{photo.placeLabel}</div>
                     <div style={{ fontSize: 11, color: '#999' }}>{photo.attribution}</div>
                     <button
-                      onClick={() => onPick(photo, result.sound)}
+                      onClick={() => onPick(photo, sound)}
                       disabled={importingRef !== null}
                       style={{ marginTop: 8, width: '100%' }}
                     >
@@ -110,6 +127,7 @@ export default function ImportPage() {
           )}
         </>
       )}
+    </div>
     </div>
   )
 }

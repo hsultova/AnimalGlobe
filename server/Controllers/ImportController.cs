@@ -3,16 +3,10 @@ using Api.Models;
 using Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Api.Controllers
 {
-	// Combined search result: photos/location from iNaturalist, an optional sound from Xeno-canto.
-	public sealed class ImportSearchResult
-	{
-		public required IReadOnlyList<PhotoPreview> Photos { get; init; }
-		public SoundPreview? Sound { get; init; }
-	}
-
 	// The preview the admin picked, sent back to persist as a draft animal.
 	public sealed class ImportRequest
 	{
@@ -40,24 +34,53 @@ namespace Api.Controllers
 	[Route("api/[controller]")]
 	[ApiController]
 	[Authorize]
-	public class ImportController(INaturalistClient inaturalistClient, XenoCantoClient xenoCantoClient, AppDbContext db) : ControllerBase
+	public class ImportController(INaturalistClient inaturalistClient, XenoCantoClient xenoCantoClient, AppDbContext db, IMemoryCache cache) : ControllerBase
 	{
-		// GET /api/import/search?name=lion — preview candidates from the external APIs.
+		// External previews change rarely; cache them so repeat searches are instant.
+		private static readonly MemoryCacheEntryOptions CacheOptions = new()
+		{
+			AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10),
+		};
+
+		// GET /api/import/search?name=lion — photo candidates from iNaturalist.
+		// Sound is fetched separately (GET /sound) so it never blocks the photo grid.
 		[HttpGet("search")]
-		public async Task<ActionResult<ImportSearchResult>> Search([FromQuery] string name, CancellationToken ct)
+		public async Task<ActionResult<IReadOnlyList<PhotoPreview>>> Search([FromQuery] string name, CancellationToken ct)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				return BadRequest("Name is required.");
 			}
 
-			var photos = await inaturalistClient.SearchAsync(name, ct);
+			var photos = await cache.GetOrCreateAsync(
+				$"inat:{name.Trim().ToLowerInvariant()}",
+				entry =>
+				{
+					entry.SetOptions(CacheOptions);
+					return inaturalistClient.SearchAsync(name, ct);
+				});
 
-			// Look up a sound by the scientific name of the best photo result, falling back to the raw term.
-			var scientificName = photos.Select(p => p.ScientificName).FirstOrDefault(s => !string.IsNullOrWhiteSpace(s)) ?? name;
-			var sound = await xenoCantoClient.GetTopRecordingAsync(scientificName, ct);
+			return Ok(photos ?? Array.Empty<PhotoPreview>());
+		}
 
-			return Ok(new ImportSearchResult { Photos = photos, Sound = sound });
+		// GET /api/import/sound?scientificName=Panthera%20leo — optional sound for a species.
+		[HttpGet("sound")]
+		public async Task<ActionResult<SoundPreview?>> Sound([FromQuery] string scientificName, CancellationToken ct)
+		{
+			if (string.IsNullOrWhiteSpace(scientificName))
+			{
+				return Ok(null);
+			}
+
+			var sound = await cache.GetOrCreateAsync(
+				$"xc:{scientificName.Trim().ToLowerInvariant()}",
+				entry =>
+				{
+					entry.SetOptions(CacheOptions);
+					return xenoCantoClient.GetTopRecordingAsync(scientificName, ct);
+				});
+
+			return Ok(sound);
 		}
 
 		// POST /api/import — persist the chosen preview as an unpublished draft animal.

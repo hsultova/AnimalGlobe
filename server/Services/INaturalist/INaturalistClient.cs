@@ -43,7 +43,9 @@ namespace Api.Services
 				["quality_grade"] = "research",
 				["photo_license"] = "cc0,cc-by,cc-by-nc",
 				["per_page"] = "20",
-				["order_by"] = "votes",
+				// Default (created_at desc) ordering: ~3s / ~1MB. "order_by=votes" sorts the
+				// most-faved observations first, but those carry huge nested arrays — it
+				// returned ~17MB and took ~15s+, tripping the HttpClient retry timeout.
 				["order"] = "desc",
 			};
 			var url = QueryHelpers.AddQueryString("observations", query);

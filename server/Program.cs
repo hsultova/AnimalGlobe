@@ -36,13 +36,33 @@ builder.Services.AddHttpClient<INaturalistClient>((provider, client) =>
 	// iNaturalist asks API consumers to identify themselves with a User-Agent.
 	client.DefaultRequestHeaders.UserAgent.ParseAdd("AnimalGlobe/1.0");
 })
-.AddStandardResilienceHandler();
+// Photos are the critical path. Give each attempt a generous window so a slow
+// iNaturalist response isn't cancelled at the default 10s and retried into a
+// timeout storm; typical latency is ~3s.
+.AddStandardResilienceHandler(o =>
+{
+	o.AttemptTimeout.Timeout = TimeSpan.FromSeconds(15);
+	o.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(30);
+	// CircuitBreaker.SamplingDuration must be >= 2 * AttemptTimeout.
+	o.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(30);
+});
 builder.Services.AddHttpClient<XenoCantoClient>((provider, client) =>
 {
 	var options = provider.GetRequiredService<IOptions<XenoCantoOptions>>().Value;
 	client.BaseAddress = new Uri(options.BaseUrl);
 })
-.AddStandardResilienceHandler();
+// Sound is an optional enrichment, so fail fast instead of letting a slow or
+// flaky Xeno-canto stall the import preview behind the default ~30s timeout.
+.AddStandardResilienceHandler(o =>
+{
+	o.AttemptTimeout.Timeout = TimeSpan.FromSeconds(4);
+	o.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
+	// CircuitBreaker.SamplingDuration must be >= 2 * AttemptTimeout.
+	o.CircuitBreaker.SamplingDuration = TimeSpan.FromSeconds(8);
+});
+
+// Cache external API previews so re-searching a species doesn't re-hit the APIs.
+builder.Services.AddMemoryCache();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -73,25 +93,6 @@ using (var scope = app.Services.CreateScope())
 		await userManager.CreateAsync(admin, "Admin123!");
 	}
 	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-	// Apply migrations but don't let a stuck migration block startup indefinitely.
-	try
-	{
-		var migrateTask = Task.Run(() => db.Database.Migrate());
-		if (!migrateTask.Wait(TimeSpan.FromSeconds(10)))
-		{
-			var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-			logger.LogWarning("Database migration timed out after 10s; continuing without applying migrations.");
-		}
-		else
-		{
-			DbSeeder.Seed(db); // inserts the animals if the table is empty
-		}
-	}
-	catch (Exception ex)
-	{
-		var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-		logger.LogError(ex, "Exception while applying migrations or seeding database");
-	}
 }
 
 // Configure the HTTP request pipeline.
