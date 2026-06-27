@@ -35,6 +35,28 @@ html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidd
 .globe-photo-marker:hover { transform: scale(1.4); z-index: 1; }
 .globe-photo-marker img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .globe-photo-marker--empty { background: #ffcc00; }
+/* the animal currently picked with the arrow keys */
+.globe-photo-marker--focused {
+  transform: scale(1.5); z-index: 2;
+  border-color: #ffcc00;
+  box-shadow: 0 0 0 4px #ffcc00, 0 0 16px 4px rgba(255, 204, 0, 0.9);
+  animation: marker-pulse 1s ease-in-out infinite;
+}
+@keyframes marker-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px #ffcc00, 0 0 12px 2px rgba(255, 204, 0, 0.7); }
+  50% { box-shadow: 0 0 0 6px #ffcc00, 0 0 22px 8px rgba(255, 204, 0, 1); }
+}
+
+/* kid-friendly keyboard hint at the bottom of the globe */
+.globe-hint {
+  position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+  margin: 0; z-index: 1;
+  padding: 10px 18px; border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55); color: #fff;
+  font-size: 1rem; font-weight: 600; text-align: center;
+  pointer-events: none; user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
 :root { font-family: system-ui, sans-serif; }
 
 table { width: 100%; border-collapse: collapse; margin-top: 1rem; }

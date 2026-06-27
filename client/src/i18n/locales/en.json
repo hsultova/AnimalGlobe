@@ -78,7 +78,8 @@
     "photoCredit": "Photo: {{attribution}}"
   },
   "globe": {
-    "animals": "Animals"
+    "animals": "Animals",
+    "hint": "⬅️ ➡️ Move between animals  ·  Enter to open  ·  Esc to close"
   },
   "lang": {
     "label": "Language",

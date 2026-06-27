@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
 import type { Animal } from "../types";
 import { getAnimals } from "../api/animals";
@@ -13,7 +13,11 @@ export default function GlobePage() {
     const globeRef = useRef<GlobeMethods | undefined>(undefined);
     const [animals, setAnimals] = useState<Animal[]>([]);
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
+    const [focusedIndex, setFocusedIndex] = useState(-1);
     const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+
+    // keep a handle on each marker element so we can highlight the focused one
+    const markerElsRef = useRef<Map<number, HTMLDivElement>>(new Map());
 
     //load animals from API
     useEffect(() => {
@@ -28,9 +32,81 @@ export default function GlobePage() {
     }, [])
 
     //place only animals on with coordinates
-    const animalMarkers = animals.filter((a) => a.latitude != null && a.longitude != null)
+    const animalMarkers = useMemo(
+        () => animals.filter((a) => a.latitude != null && a.longitude != null),
+        [animals]
+    )
 
     const navigate = useNavigate();
+
+    // keyboard controls for kids: arrows to move, Enter to open, Esc to close
+    useEffect(() => {
+        function onKeyDown(e: KeyboardEvent) {
+            // when a card is open, the only key we care about is Esc to close it
+            if (selectedAnimal) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    setSelectedAnimal(null);
+                }
+                return;
+            }
+
+            if (animalMarkers.length === 0) return;
+
+            switch (e.key) {
+                case 'ArrowRight':
+                case 'ArrowDown':
+                    e.preventDefault();
+                    setFocusedIndex((i) => (i + 1) % animalMarkers.length);
+                    break;
+                case 'ArrowLeft':
+                case 'ArrowUp':
+                    e.preventDefault();
+                    setFocusedIndex((i) => (i <= 0 ? animalMarkers.length - 1 : i - 1));
+                    break;
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    if (focusedIndex >= 0) {
+                        setSelectedAnimal(animalMarkers[focusedIndex]);
+                    }
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    setFocusedIndex(-1);
+                    break;
+            }
+        }
+
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [selectedAnimal, animalMarkers, focusedIndex])
+
+    // spin the globe towards the focused animal and pause auto-rotation
+    useEffect(() => {
+        const globe = globeRef.current;
+        if (!globe) return;
+
+        const controls = globe.controls();
+        const target = animalMarkers[focusedIndex];
+        if (target) {
+            controls.autoRotate = false;
+            globe.pointOfView(
+                { lat: target.latitude, lng: target.longitude, altitude: 1.6 },
+                800
+            );
+        } else {
+            controls.autoRotate = true;
+        }
+    }, [focusedIndex, animalMarkers])
+
+    // highlight the focused marker
+    useEffect(() => {
+        const focusedId = animalMarkers[focusedIndex]?.id;
+        markerElsRef.current.forEach((el, id) => {
+            el.classList.toggle('globe-photo-marker--focused', id === focusedId);
+        });
+    }, [focusedIndex, animalMarkers])
 
     return (
         <>
@@ -70,9 +146,11 @@ export default function GlobePage() {
                         el.classList.add('globe-photo-marker--empty');
                     }
                     el.onclick = () => setSelectedAnimal(animal);
+                    markerElsRef.current.set(animal.id, el);
                     return el;
                 }}
             />
+            <p className="globe-hint">{t('globe.hint')}</p>
             {selectedAnimal && (
                 <AnimalCard animal={selectedAnimal} onClose={() => setSelectedAnimal(null)} />
             )}

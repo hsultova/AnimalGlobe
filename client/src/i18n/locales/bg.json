@@ -78,7 +78,8 @@
     "photoCredit": "Снимка: {{attribution}}"
   },
   "globe": {
-    "animals": "Животни"
+    "animals": "Животни",
+    "hint": "⬅️ ➡️ Движи се между животните  ·  Enter за отваряне  ·  Esc за затваряне"
   },
   "lang": {
     "label": "Език",
