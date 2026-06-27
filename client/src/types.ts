@@ -33,6 +33,7 @@ export interface AnimalVM {
 
 export interface PhotoPreview {
   thumbnailUrl: string
+  mediumUrl: string
   largeUrl: string
   attribution: string
   licenseCode: string

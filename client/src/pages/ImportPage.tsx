@@ -107,7 +107,7 @@ export default function ImportPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
               {photos.map((photo) => (
                 <div key={photo.sourceRef} style={{ border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden' }}>
-                  <img src={photo.thumbnailUrl} alt={photo.commonName} style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
+                  <img src={photo.mediumUrl} alt={photo.commonName} loading="lazy" style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                   <div style={{ padding: 10 }}>
                     <div style={{ fontWeight: 600 }}>{photo.commonName || '(no common name)'}</div>
                     <div style={{ fontStyle: 'italic', color: '#555' }}>{photo.scientificName}</div>

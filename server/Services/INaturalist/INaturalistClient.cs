@@ -6,7 +6,8 @@ namespace Api.Services
 {
 	public sealed class PhotoPreview
 	{
-		public required string ThumbnailUrl { get; init; }   // square — marker/grid
+		public required string ThumbnailUrl { get; init; }   // square crop — stored marker
+		public required string MediumUrl { get; init; }      // 500px — crisp grid preview
 		public required string LargeUrl { get; init; }       // for the animal card
 		public required string Attribution { get; init; }
 		public string LicenseCode { get; init; } = "";
@@ -43,9 +44,11 @@ namespace Api.Services
 				["quality_grade"] = "research",
 				["photo_license"] = "cc0,cc-by,cc-by-nc",
 				["per_page"] = "20",
-				// Default (created_at desc) ordering: ~3s / ~1MB. "order_by=votes" sorts the
-				// most-faved observations first, but those carry huge nested arrays — it
-				// returned ~17MB and took ~15s+, tripping the HttpClient retry timeout.
+				// Bias toward better photos: "popular=true" keeps only observations that
+				// have been faved (~6s / ~2MB). Avoid "order_by=votes" — sorting by faves
+				// drags in the most-engaged observations' huge nested arrays (~17MB / ~20s,
+				// which tripped the HttpClient retry timeout). Default ordering otherwise.
+				["popular"] = "true",
 				["order"] = "desc",
 			};
 			var url = QueryHelpers.AddQueryString("observations", query);
@@ -75,6 +78,7 @@ namespace Api.Services
 				previews.Add(new PhotoPreview
 				{
 					ThumbnailUrl = photo.Url,                         // square
+					MediumUrl = ResizePhoto(photo.Url, "medium"),
 					LargeUrl = ResizePhoto(photo.Url, "large"),
 					Attribution = photo.Attribution ?? "Unknown",
 					LicenseCode = photo.LicenseCode ?? "",
