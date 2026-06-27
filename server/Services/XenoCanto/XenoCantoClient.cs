@@ -3,6 +3,7 @@ using Api.Services.XenoCanto;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Api.Services
 {
@@ -20,6 +21,9 @@ namespace Api.Services
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 			PropertyNameCaseInsensitive = true,
+			// Xeno-canto v3 returns count fields (e.g. numRecordings) as JSON strings
+			// rather than numbers, so allow reading numeric properties from strings.
+			NumberHandling = JsonNumberHandling.AllowReadingFromString,
 		};
 
 		private readonly HttpClient _httpClient;

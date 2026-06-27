@@ -27,6 +27,7 @@ export interface AnimalVM {
   placeLabel: string
   photoUrl?: string
   soundUrl?: string
+  soundAttribution?: string
 }
 
 // --- Import preview (iNaturalist + Xeno-canto) ---

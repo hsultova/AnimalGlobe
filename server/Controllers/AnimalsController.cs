@@ -126,6 +126,7 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 	{
 		var animal = await _db.Animals
 			.Include(a => a.Locations)
+			.Include(a => a.Media)
 			.FirstOrDefaultAsync(a => a.Id == id);
 		if (animal is null)
 		{
@@ -149,7 +150,47 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 			location.PlaceLabel = animalVm.PlaceLabel;
 		}
 
+		// Sync media so a photo/sound (e.g. a sound fetched later from Xeno-canto)
+		// can be added, updated, or cleared from the edit form.
+		UpsertMedia(animal, MediaKind.Photo, animalVm.PhotoUrl, null);
+		UpsertMedia(animal, MediaKind.Sound, animalVm.SoundUrl, animalVm.SoundAttribution);
+
 		await _db.SaveChangesAsync();
 		return NoContent();
+	}
+
+	// Add, update, or remove the single photo/sound asset to match the submitted URL.
+	private static void UpsertMedia(Animal animal, MediaKind kind, string? url, string? attribution)
+	{
+		var existing = animal.Media.FirstOrDefault(m => m.Kind == kind);
+
+		if (string.IsNullOrWhiteSpace(url))
+		{
+			if (existing is not null)
+			{
+				animal.Media.Remove(existing);
+			}
+			return;
+		}
+
+		if (existing is null)
+		{
+			animal.Media.Add(new MediaAsset
+			{
+				Kind = kind,
+				Url = url,
+				Attribution = attribution ?? "",
+				SourceApi = "manual",
+			});
+		}
+		else
+		{
+			existing.Url = url;
+			// Keep the original attribution unless a new one was supplied.
+			if (attribution is not null)
+			{
+				existing.Attribution = attribution;
+			}
+		}
 	}
 }

@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { getAnimal, createAnimal, updateAnimal } from '../api/animals'
+import { fetchSound } from '../api/import'
 import type { AnimalGroup, AnimalVM } from '../types'
 
 const GROUPS: AnimalGroup[] = ['Mammal', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Insect', 'Other']
 const EMPTY: AnimalVM = {
   commonName: '', scientificName: '', group: 'Mammal',
-  shortFact: '', latitude: 0, longitude: 0, placeLabel: '', photoUrl: '', soundUrl: ''
+  shortFact: '', latitude: 0, longitude: 0, placeLabel: '', photoUrl: '', soundUrl: '', soundAttribution: ''
 }
 
 export default function AnimalFormPage() {
@@ -14,6 +15,8 @@ export default function AnimalFormPage() {
   const isEdit = id != null
   const [form, setForm] = useState<AnimalVM>(EMPTY)
   const [error, setError] = useState('')
+  const [soundFetching, setSoundFetching] = useState(false)
+  const [soundStatus, setSoundStatus] = useState('')
   const navigate = useNavigate()
 
   // when editing, load the animal and map read-shape → input-shape
@@ -29,13 +32,37 @@ export default function AnimalFormPage() {
         longitude: animal.longitude ?? 0,
         placeLabel: animal.placeLabel ?? '',
         photoUrl: animal.photoUrl ?? '',
-        soundUrl: animal.soundUrl ?? ''
+        soundUrl: animal.soundUrl ?? '',
+        soundAttribution: animal.soundAttribution ?? ''
       }))
       .catch(() => setError('Could not load this animal.'))
   }, [id, isEdit])
 
   function set<K extends keyof AnimalVM>(key: K, value: AnimalVM[K]) {
     setForm((f) => ({ ...f, [key]: value }))
+  }
+
+  // Look up a recording for the current scientific name and fill the sound fields.
+  // Persisted only when the form is saved.
+  async function onFetchSound() {
+    const scientificName = form.scientificName.trim()
+    if (!scientificName) return
+    setSoundStatus('')
+    setSoundFetching(true)
+    try {
+      const sound = await fetchSound(scientificName)
+      if (sound) {
+        set('soundUrl', sound.url)
+        set('soundAttribution', sound.attribution)
+        setSoundStatus('Found a recording — Save changes to keep it.')
+      } else {
+        setSoundStatus('No recording found for this species.')
+      }
+    } catch {
+      setSoundStatus('Sound lookup failed.')
+    } finally {
+      setSoundFetching(false)
+    }
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -89,6 +116,20 @@ export default function AnimalFormPage() {
       <label>Sound URL
         <input value={form.soundUrl} onChange={(e) => set('soundUrl', e.target.value)} />
       </label>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: -4 }}>
+        <button type="button" onClick={onFetchSound} disabled={soundFetching || !form.scientificName.trim()}>
+          {soundFetching ? 'Fetching…' : 'Fetch sound from Xeno-canto'}
+        </button>
+        {soundStatus && <span style={{ fontSize: 12, color: '#666' }}>{soundStatus}</span>}
+      </div>
+      {form.soundUrl && (
+        <div>
+          <audio controls src={form.soundUrl} style={{ width: '100%' }} />
+          {form.soundAttribution && (
+            <div style={{ fontSize: 11, color: '#999' }}>{form.soundAttribution}</div>
+          )}
+        </div>
+      )}
 
       <div style={{ display: 'flex', gap: 10 }}>
         <button type="submit">{isEdit ? 'Save changes' : 'Create'}</button>
