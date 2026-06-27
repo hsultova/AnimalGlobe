@@ -1,7 +1,11 @@
-using System.Text.Json.Serialization;
+using Api.Configuration;
 using Api.Data;
+using Api.Services;
+using Api.Services.XenoCanto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +25,24 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 })
 	.AddEntityFrameworkStores<AppDbContext>()
 	.AddDefaultTokenProviders();
+
+builder.Services.Configure<INaturalistOptions>(builder.Configuration.GetSection(INaturalistOptions.SectionName));
+builder.Services.Configure<XenoCantoOptions>(builder.Configuration.GetSection(XenoCantoOptions.SectionName));
+
+builder.Services.AddHttpClient<INaturalistClient>((provider, client) =>
+{
+	var options = provider.GetRequiredService<IOptions<INaturalistOptions>>().Value;
+	client.BaseAddress = new Uri(options.BaseUrl);
+	// iNaturalist asks API consumers to identify themselves with a User-Agent.
+	client.DefaultRequestHeaders.UserAgent.ParseAdd("AnimalGlobe/1.0");
+})
+.AddStandardResilienceHandler();
+builder.Services.AddHttpClient<XenoCantoClient>((provider, client) =>
+{
+	var options = provider.GetRequiredService<IOptions<XenoCantoOptions>>().Value;
+	client.BaseAddress = new Uri(options.BaseUrl);
+})
+.AddStandardResilienceHandler();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {

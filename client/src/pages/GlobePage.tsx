@@ -4,6 +4,7 @@ import type { Animal } from "../types";
 import { getAnimals } from "../api/animals";
 import Globe from "react-globe.gl";
 import AnimalCard from "../components/AnimalCard";
+import { useNavigate } from "react-router-dom";
 
 export default function GlobePage() {
     const globeRef = useRef<GlobeMethods | undefined>(undefined);
@@ -26,8 +27,11 @@ export default function GlobePage() {
     //place only animals on with coordinates
     const animalMarkers = animals.filter((a) => a.latitude != null && a.longitude != null)
 
+    const navigate = useNavigate();
+
     return (
         <>
+            <button onClick={() => navigate('/animals')}>Animals</button>
             <Globe
                 ref={globeRef}
                 width={size.width}

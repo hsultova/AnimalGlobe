@@ -24,6 +24,7 @@ export default function AnimalPage() {
         <h1>Animals</h1>
         <div style={{ display: 'flex', gap: 8 }}>
           <Link to="/animals/new"><button>+ New animal</button></Link>
+          <Link to="/animals/import"><button>Import from API</button></Link>
           <button onClick={onLogout}>Log out</button>
         </div>
       </header>
