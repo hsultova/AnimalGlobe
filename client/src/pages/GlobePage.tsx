@@ -38,19 +38,33 @@ export default function GlobePage() {
                 height={size.height}
                 globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
                 backgroundColor="#0b1026"
-                // --- markers (the "points" layer) ---
-                pointsData={animalMarkers}
-                pointLat="latitude"
-                pointLng="longitude"
-                pointColor={() => '#ffcc00'}
-                pointAltitude={0.03} pointRadius={0.6}
-                pointLabel="commonName"          // hover tooltip
-                onPointClick={(p) => setSelectedAnimal(p as Animal)}
                 // --- spin gently once it's ready ---
                 onGlobeReady={() => {
                     const controls = globeRef.current!.controls()
                     controls.autoRotate = true
                     controls.autoRotateSpeed = 0.6
+                }}
+                // --- markers (small animal photos) ---
+                htmlElementsData={animalMarkers}
+                htmlLat="latitude"
+                htmlLng="longitude"
+                htmlAltitude={0.02}
+                htmlElement={(d) => {
+                    const animal = d as Animal;
+                    const el = document.createElement('div');
+                    el.className = 'globe-photo-marker';
+                    el.title = animal.commonName;
+                    if (animal.photoUrl) {
+                        const img = document.createElement('img');
+                        img.src = animal.photoUrl;
+                        img.alt = animal.commonName;
+                        el.appendChild(img);
+                    } else {
+                        // fallback for animals without a photo
+                        el.classList.add('globe-photo-marker--empty');
+                    }
+                    el.onclick = () => setSelectedAnimal(animal);
+                    return el;
                 }}
             />
             {selectedAnimal && (
