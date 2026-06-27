@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getAnimal, createAnimal, updateAnimal } from '../api/animals'
 import { fetchSound } from '../api/import'
 import type { AnimalGroup, AnimalVM } from '../types'
@@ -11,7 +12,8 @@ const EMPTY: AnimalVM = {
 }
 
 export default function AnimalFormPage() {
-  const { id } = useParams()            
+  const { t } = useTranslation()
+  const { id } = useParams()
   const isEdit = id != null
   const [form, setForm] = useState<AnimalVM>(EMPTY)
   const [error, setError] = useState('')
@@ -35,7 +37,7 @@ export default function AnimalFormPage() {
         soundUrl: animal.soundUrl ?? '',
         soundAttribution: animal.soundAttribution ?? ''
       }))
-      .catch(() => setError('Could not load this animal.'))
+      .catch(() => setError(t('form.loadFailed')))
   }, [id, isEdit])
 
   function set<K extends keyof AnimalVM>(key: K, value: AnimalVM[K]) {
@@ -54,12 +56,12 @@ export default function AnimalFormPage() {
       if (sound) {
         set('soundUrl', sound.url)
         set('soundAttribution', sound.attribution)
-        setSoundStatus('Found a recording — Save changes to keep it.')
+        setSoundStatus(t('form.soundFound'))
       } else {
-        setSoundStatus('No recording found for this species.')
+        setSoundStatus(t('form.soundNone'))
       }
     } catch {
-      setSoundStatus('Sound lookup failed.')
+      setSoundStatus(t('form.soundFailed'))
     } finally {
       setSoundFetching(false)
     }
@@ -73,52 +75,52 @@ export default function AnimalFormPage() {
       else await createAnimal(form)
       navigate('/animals')
     } catch {
-      setError('Save failed.')
+      setError(t('form.saveFailed'))
     }
   }
 
   return (
     <form onSubmit={onSubmit} style={{ maxWidth: 480, margin: '40px auto', display: 'grid', gap: 10, fontFamily: 'system-ui' }}>
-      <h1>{isEdit ? 'Edit animal' : 'New animal'}</h1>
+      <h1>{isEdit ? t('form.titleEdit') : t('form.titleNew')}</h1>
 
-      <label>Common name
+      <label>{t('form.commonName')}
         <input value={form.commonName} onChange={(e) => set('commonName', e.target.value)} required />
       </label>
-      <label>Scientific name
+      <label>{t('form.scientificName')}
         <input value={form.scientificName} onChange={(e) => set('scientificName', e.target.value)} />
       </label>
-      <label>Group
+      <label>{t('form.group')}
         <select value={form.group} onChange={(e) => set('group', e.target.value as AnimalGroup)}>
-          {GROUPS.map((g) => <option key={g} value={g}>{g}</option>)}
+          {GROUPS.map((g) => <option key={g} value={g}>{t(`groups.${g}`)}</option>)}
         </select>
       </label>
-      <label>Fun fact
+      <label>{t('form.funFact')}
         <input value={form.shortFact} onChange={(e) => set('shortFact', e.target.value)} />
       </label>
 
       <div style={{ display: 'flex', gap: 10 }}>
-        <label style={{ flex: 1 }}>Latitude
+        <label style={{ flex: 1 }}>{t('form.latitude')}
           <input type="number" step="any" value={form.latitude}
                  onChange={(e) => set('latitude', e.target.valueAsNumber)} />
         </label>
-        <label style={{ flex: 1 }}>Longitude
+        <label style={{ flex: 1 }}>{t('form.longitude')}
           <input type="number" step="any" value={form.longitude}
                  onChange={(e) => set('longitude', e.target.valueAsNumber)} />
         </label>
       </div>
 
-      <label>Place label
+      <label>{t('form.placeLabel')}
         <input value={form.placeLabel} onChange={(e) => set('placeLabel', e.target.value)} />
       </label>
-      <label>Photo URL
+      <label>{t('form.photoUrl')}
         <input value={form.photoUrl} onChange={(e) => set('photoUrl', e.target.value)} />
       </label>
-      <label>Sound URL
+      <label>{t('form.soundUrl')}
         <input value={form.soundUrl} onChange={(e) => set('soundUrl', e.target.value)} />
       </label>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: -4 }}>
         <button type="button" onClick={onFetchSound} disabled={soundFetching || !form.scientificName.trim()}>
-          {soundFetching ? 'Fetching…' : 'Fetch sound from Xeno-canto'}
+          {soundFetching ? t('form.fetching') : t('form.fetchSound')}
         </button>
         {soundStatus && <span style={{ fontSize: 12, color: '#666' }}>{soundStatus}</span>}
       </div>
@@ -132,8 +134,8 @@ export default function AnimalFormPage() {
       )}
 
       <div style={{ display: 'flex', gap: 10 }}>
-        <button type="submit">{isEdit ? 'Save changes' : 'Create'}</button>
-        <button type="button" onClick={() => navigate('/animals')}>Cancel</button>
+        <button type="submit">{isEdit ? t('form.save') : t('form.create')}</button>
+        <button type="button" onClick={() => navigate('/animals')}>{t('form.cancel')}</button>
       </div>
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
     </form>

@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Зареждане…"
+  },
+  "login": {
+    "title": "Вход за администратор",
+    "email": "Имейл",
+    "password": "Парола",
+    "submit": "Вход",
+    "failed": "Неуспешен вход: невалиден имейл или парола"
+  },
+  "animals": {
+    "title": "Животни",
+    "new": "+ Ново животно",
+    "import": "Импорт от API",
+    "logout": "Изход",
+    "colName": "Име",
+    "colGroup": "Група",
+    "colPlace": "Място",
+    "colPublished": "Публикувано",
+    "edit": "Редактирай",
+    "publish": "Публикувай",
+    "unpublish": "Скрий",
+    "delete": "Изтрий",
+    "confirmDelete": "Да изтрия ли това животно?"
+  },
+  "form": {
+    "titleNew": "Ново животно",
+    "titleEdit": "Редактиране на животно",
+    "commonName": "Общоприето име",
+    "scientificName": "Научно име",
+    "group": "Група",
+    "funFact": "Интересен факт",
+    "latitude": "Географска ширина",
+    "longitude": "Географска дължина",
+    "placeLabel": "Етикет на мястото",
+    "photoUrl": "URL на снимка",
+    "soundUrl": "URL на звук",
+    "fetchSound": "Вземи звук от Xeno-canto",
+    "fetching": "Зареждане…",
+    "soundFound": "Намерен е запис — запазете промените, за да го задържите.",
+    "soundNone": "Няма намерен запис за този вид.",
+    "soundFailed": "Търсенето на звук е неуспешно.",
+    "loadFailed": "Това животно не може да бъде заредено.",
+    "saveFailed": "Запазването е неуспешно.",
+    "save": "Запази промените",
+    "create": "Създай",
+    "cancel": "Отказ"
+  },
+  "groups": {
+    "Mammal": "Бозайник",
+    "Bird": "Птица",
+    "Reptile": "Влечуго",
+    "Amphibian": "Земноводно",
+    "Fish": "Риба",
+    "Insect": "Насекомо",
+    "Other": "Друго"
+  },
+  "import": {
+    "title": "Импорт от API",
+    "back": "Назад към животните",
+    "placeholder": "Име на вид, напр. лъв",
+    "search": "Търси",
+    "searching": "Търсене…",
+    "searchFailed": "Търсенето е неуспешно.",
+    "importFailed": "Импортът е неуспешен.",
+    "soundLabel": "Звук",
+    "loadingSound": "Зареждане на звук…",
+    "noSound": "Няма наличен звуков запис за този вид.",
+    "noPhotos": "Няма намерени снимки. Опитайте друго име.",
+    "noCommonName": "(без общоприето име)",
+    "importDraft": "Импортирай като чернова",
+    "importing": "Импортиране…"
+  },
+  "card": {
+    "playSound": "▶ Пусни звук",
+    "noSound": "Няма наличен звук",
+    "photoCredit": "Снимка: {{attribution}}"
+  },
+  "globe": {
+    "animals": "Животни"
+  },
+  "lang": {
+    "label": "Език",
+    "en": "English",
+    "bg": "Български"
+  }
+}

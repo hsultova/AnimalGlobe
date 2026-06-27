@@ -1,9 +1,11 @@
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import type { Animal } from "../types";
 
 type Props = { animal: Animal; onClose: () => void }
 
 export default function AnimalCard({ animal, onClose }: Props) {
+    const { t } = useTranslation();
     const audioRef = useRef<HTMLAudioElement>(null);
 
     function playSound() {
@@ -28,12 +30,12 @@ export default function AnimalCard({ animal, onClose }: Props) {
 
                 {animal.soundUrl ? (<>
                     <button className="play-button" onClick={playSound}>
-                        ▶ Play Sound
+                        {t('card.playSound')}
                     </button>
                     <audio ref={audioRef} src={animal.soundUrl} preload="none" />
-                </>) : (<p className="no-sound">No sound available</p>)}
+                </>) : (<p className="no-sound">{t('card.noSound')}</p>)}
 
-                {animal.photoAttribution && <p className="credit">Photo: {animal.photoAttribution}</p>}
+                {animal.photoAttribution && <p className="credit">{t('card.photoCredit', { attribution: animal.photoAttribution })}</p>}
             </div>
         </div>
     );

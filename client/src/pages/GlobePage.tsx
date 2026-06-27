@@ -4,9 +4,12 @@ import type { Animal } from "../types";
 import { getAnimals } from "../api/animals";
 import Globe from "react-globe.gl";
 import AnimalCard from "../components/AnimalCard";
+import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function GlobePage() {
+    const { t } = useTranslation();
     const globeRef = useRef<GlobeMethods | undefined>(undefined);
     const [animals, setAnimals] = useState<Animal[]>([]);
     const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
@@ -31,7 +34,10 @@ export default function GlobePage() {
 
     return (
         <>
-            <button onClick={() => navigate('/animals')}>Animals</button>
+            <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, display: 'flex', gap: 8 }}>
+                <button onClick={() => navigate('/animals')}>{t('globe.animals')}</button>
+                <LanguageSwitcher />
+            </div>
             <Globe
                 ref={globeRef}
                 width={size.width}

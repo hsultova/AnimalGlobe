@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { searchImport, fetchSound, importAnimal } from '../api/import'
 import type { PhotoPreview, SoundPreview } from '../types'
 
 export default function ImportPage() {
+  const { t } = useTranslation()
   const [name, setName] = useState('')
   const [photos, setPhotos] = useState<PhotoPreview[] | null>(null)
   const [sound, setSound] = useState<SoundPreview | null>(null)
@@ -32,7 +34,7 @@ export default function ImportPage() {
         .catch(() => setSound(null))
         .finally(() => setSoundLoading(false))
     } catch {
-      setError('Search failed.')
+      setError(t('import.searchFailed'))
     } finally {
       setLoading(false)
     }
@@ -61,7 +63,7 @@ export default function ImportPage() {
       })
       navigate(`/animals/${id}/edit`)
     } catch {
-      setError('Import failed.')
+      setError(t('import.importFailed'))
       setImportingRef(null)
     }
   }
@@ -72,18 +74,18 @@ export default function ImportPage() {
     <div style={{ height: '100vh', overflowY: 'auto' }}>
     <div style={{ maxWidth: 900, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Import from API</h1>
-        <button onClick={() => navigate('/animals')}>Back to animals</button>
+        <h1>{t('import.title')}</h1>
+        <button onClick={() => navigate('/animals')}>{t('import.back')}</button>
       </header>
 
       <form onSubmit={onSearch} style={{ display: 'flex', gap: 8, margin: '16px 0' }}>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Species name, e.g. lion"
+          placeholder={t('import.placeholder')}
           style={{ flex: 1, padding: 8 }}
         />
-        <button type="submit" disabled={loading}>{loading ? 'Searching…' : 'Search'}</button>
+        <button type="submit" disabled={loading}>{loading ? t('import.searching') : t('import.search')}</button>
       </form>
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
@@ -91,25 +93,25 @@ export default function ImportPage() {
       {photos && (
         <>
           {soundLoading ? (
-            <p style={{ color: '#666' }}>Loading sound…</p>
+            <p style={{ color: '#666' }}>{t('import.loadingSound')}</p>
           ) : sound ? (
             <div style={{ margin: '8px 0 20px' }}>
-              <strong>Sound</strong> — {sound.attribution}
+              <strong>{t('import.soundLabel')}</strong> — {sound.attribution}
               <audio controls src={sound.url} style={{ display: 'block', marginTop: 6, width: '100%' }} />
             </div>
           ) : (
-            <p style={{ color: '#666' }}>No sound recording available for this species.</p>
+            <p style={{ color: '#666' }}>{t('import.noSound')}</p>
           )}
 
           {photos.length === 0 ? (
-            <p style={{ color: '#666' }}>No photos found. Try another name.</p>
+            <p style={{ color: '#666' }}>{t('import.noPhotos')}</p>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 16 }}>
               {photos.map((photo) => (
                 <div key={photo.sourceRef} style={{ border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden' }}>
                   <img src={photo.mediumUrl} alt={photo.commonName} loading="lazy" style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }} />
                   <div style={{ padding: 10 }}>
-                    <div style={{ fontWeight: 600 }}>{photo.commonName || '(no common name)'}</div>
+                    <div style={{ fontWeight: 600 }}>{photo.commonName || t('import.noCommonName')}</div>
                     <div style={{ fontStyle: 'italic', color: '#555' }}>{photo.scientificName}</div>
                     <div style={{ fontSize: 12, color: '#777', margin: '4px 0' }}>{photo.placeLabel}</div>
                     <div style={{ fontSize: 11, color: '#999' }}>{photo.attribution}</div>
@@ -118,7 +120,7 @@ export default function ImportPage() {
                       disabled={importingRef !== null}
                       style={{ marginTop: 8, width: '100%' }}
                     >
-                      {importingRef === photo.sourceRef ? 'Importing…' : 'Import as draft'}
+                      {importingRef === photo.sourceRef ? t('import.importing') : t('import.importDraft')}
                     </button>
                   </div>
                 </div>

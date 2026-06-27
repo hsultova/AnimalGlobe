@@ -1,0 +1,88 @@
+{
+  "common": {
+    "loading": "Checking…"
+  },
+  "login": {
+    "title": "Admin login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Log in",
+    "failed": "Login failed: Invalid email or password"
+  },
+  "animals": {
+    "title": "Animals",
+    "new": "+ New animal",
+    "import": "Import from API",
+    "logout": "Log out",
+    "colName": "Name",
+    "colGroup": "Group",
+    "colPlace": "Place",
+    "colPublished": "Published",
+    "edit": "Edit",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "delete": "Delete",
+    "confirmDelete": "Delete this animal?"
+  },
+  "form": {
+    "titleNew": "New animal",
+    "titleEdit": "Edit animal",
+    "commonName": "Common name",
+    "scientificName": "Scientific name",
+    "group": "Group",
+    "funFact": "Fun fact",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "placeLabel": "Place label",
+    "photoUrl": "Photo URL",
+    "soundUrl": "Sound URL",
+    "fetchSound": "Fetch sound from Xeno-canto",
+    "fetching": "Fetching…",
+    "soundFound": "Found a recording — Save changes to keep it.",
+    "soundNone": "No recording found for this species.",
+    "soundFailed": "Sound lookup failed.",
+    "loadFailed": "Could not load this animal.",
+    "saveFailed": "Save failed.",
+    "save": "Save changes",
+    "create": "Create",
+    "cancel": "Cancel"
+  },
+  "groups": {
+    "Mammal": "Mammal",
+    "Bird": "Bird",
+    "Reptile": "Reptile",
+    "Amphibian": "Amphibian",
+    "Fish": "Fish",
+    "Insect": "Insect",
+    "Other": "Other"
+  },
+  "import": {
+    "title": "Import from API",
+    "back": "Back to animals",
+    "placeholder": "Species name, e.g. lion",
+    "search": "Search",
+    "searching": "Searching…",
+    "searchFailed": "Search failed.",
+    "importFailed": "Import failed.",
+    "soundLabel": "Sound",
+    "loadingSound": "Loading sound…",
+    "noSound": "No sound recording available for this species.",
+    "noPhotos": "No photos found. Try another name.",
+    "noCommonName": "(no common name)",
+    "importDraft": "Import as draft",
+    "importing": "Importing…"
+  },
+  "card": {
+    "playSound": "▶ Play Sound",
+    "noSound": "No sound available",
+    "photoCredit": "Photo: {{attribution}}"
+  },
+  "globe": {
+    "animals": "Animals"
+  },
+  "lang": {
+    "label": "Language",
+    "en": "English",
+    "bg": "Български"
+  }
+}
