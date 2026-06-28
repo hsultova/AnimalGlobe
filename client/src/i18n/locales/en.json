@@ -92,7 +92,7 @@
   },
   "globe": {
     "animals": "Animals",
-    "hint": "⬅️ ➡️ Move between animals  ·  Enter to open  ·  Esc to close"
+    "hint": "⬅️ ➡️ ⬆️ ⬇️ Move between animals  ·  Enter to open  ·  Esc to close"
   },
   "lang": {
     "label": "Language",

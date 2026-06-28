@@ -8,6 +8,59 @@ import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 
+type Direction = 'up' | 'down' | 'left' | 'right';
+
+// wrap a longitude difference into [-180, 180] so the date line isn't a wall
+function normalizeLngDelta(delta: number) {
+    return ((delta % 360) + 540) % 360 - 180;
+}
+
+// find the geographically nearest animal in a given compass direction.
+// up/down move along latitude, left/right along longitude. The chosen
+// candidate must actually lie in that direction; among those we pick the
+// closest, lightly penalizing sideways drift so we stay on a sensible line.
+function findNeighborInDirection(
+    animals: Animal[],
+    fromIndex: number,
+    direction: Direction
+): number {
+    if (animals.length === 0) return fromIndex;
+    // nothing focused yet: first key press just lands on the first animal
+    if (fromIndex < 0) return 0;
+
+    const from = animals[fromIndex];
+    let best = -1;
+    let bestScore = Infinity;
+
+    animals.forEach((candidate, index) => {
+        if (index === fromIndex) return;
+
+        const dLat = candidate.latitude - from.latitude;                 // + = north
+        const dLng = normalizeLngDelta(candidate.longitude - from.longitude); // + = east
+
+        let primary: number;
+        let perpendicular: number;
+        switch (direction) {
+            case 'up': primary = dLat; perpendicular = dLng; break;
+            case 'down': primary = -dLat; perpendicular = dLng; break;
+            case 'right': primary = dLng; perpendicular = dLat; break;
+            case 'left': primary = -dLng; perpendicular = dLat; break;
+        }
+
+        if (primary <= 0) return; // candidate isn't in this direction
+
+        // forward distance plus a penalty for how far off-axis it sits
+        const score = primary + Math.abs(perpendicular) * 2;
+        if (score < bestScore) {
+            bestScore = score;
+            best = index;
+        }
+    });
+
+    // if there's no animal that way, stay put
+    return best >= 0 ? best : fromIndex;
+}
+
 export default function GlobePage() {
     const { t } = useTranslation();
     const globeRef = useRef<GlobeMethods | undefined>(undefined);
@@ -68,14 +121,20 @@ export default function GlobePage() {
 
             switch (e.key) {
                 case 'ArrowRight':
-                case 'ArrowDown':
                     e.preventDefault();
-                    setFocusedIndex((i) => (i + 1) % animalMarkers.length);
+                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'right'));
                     break;
                 case 'ArrowLeft':
+                    e.preventDefault();
+                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'left'));
+                    break;
                 case 'ArrowUp':
                     e.preventDefault();
-                    setFocusedIndex((i) => (i <= 0 ? animalMarkers.length - 1 : i - 1));
+                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'up'));
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'down'));
                     break;
                 case 'Enter':
                 case ' ':
@@ -113,21 +172,21 @@ export default function GlobePage() {
         }
     }, [focusedIndex, animalMarkers])
 
-    // highlight the focused marker plus the ones the arrows will jump to next/prev
+    // highlight the focused marker plus the ones each arrow will jump to
     useEffect(() => {
-        const count = animalMarkers.length;
         const focusedId = animalMarkers[focusedIndex]?.id;
-        const nextId = focusedIndex >= 0 && count > 1
-            ? animalMarkers[(focusedIndex + 1) % count]?.id
-            : undefined;
-        const prevId = focusedIndex >= 0 && count > 1
-            ? animalMarkers[(focusedIndex - 1 + count) % count]?.id
-            : undefined;
+        const adjacentIds = new Set<number>();
+        if (focusedIndex >= 0) {
+            for (const direction of ['up', 'down', 'left', 'right'] as const) {
+                const index = findNeighborInDirection(animalMarkers, focusedIndex, direction);
+                if (index !== focusedIndex) adjacentIds.add(animalMarkers[index].id);
+            }
+        }
         markerElsRef.current.forEach((el, id) => {
             el.classList.toggle('globe-photo-marker--focused', id === focusedId);
             el.classList.toggle(
                 'globe-photo-marker--adjacent',
-                id !== focusedId && (id === nextId || id === prevId)
+                id !== focusedId && adjacentIds.has(id)
             );
         });
     }, [focusedIndex, animalMarkers])
