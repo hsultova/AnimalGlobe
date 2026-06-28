@@ -16,36 +16,63 @@ html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidd
   position: absolute; top: 8px; right: 12px;
   border: none; background: none; font-size: 1.6rem; cursor: pointer;
 }
-.play {
+.fact { font-size: 1rem; line-height: 1.5; color: #333; margin: 12px 0; }
+.placelabel { font-size: 0.9rem; color: #666; margin: 4px 0; }
+.no-sound { font-size: 0.9rem; color: #888; margin-top: 8px; }
+.play-button {
   font-size: 1.2rem; padding: 12px 22px; margin-top: 8px;
   border: none; border-radius: 999px; background: #ffcc00; cursor: pointer;
 }
+.play-button--playing { background: #ff6b6b; color: #fff; }
+.play-hint { font-size: 0.8rem; color: #888; margin-top: 6px; }
 .credit { font-size: 0.75rem; color: #888; margin-top: 12px; }
 
 /* small animal photo markers on the globe */
 .globe-photo-marker {
+  position: relative;
   width: 68px; height: 68px; cursor: pointer;
   pointer-events: auto;
-  border-radius: 50%; overflow: hidden;
+  border-radius: 50%;
   border: 2px solid #fff;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
   background: #ffcc00;
   transition: transform 0.15s ease;
 }
 .globe-photo-marker:hover { transform: scale(1.4); z-index: 1; }
-.globe-photo-marker img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.globe-photo-marker img { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 100%; }
 .globe-photo-marker--empty { background: #ffcc00; }
-/* the animal currently picked with the arrow keys */
+/* the animal currently picked with the arrow keys.
+   markers are billboarded (three-globe renders them via CSS2DObject, always
+   facing the camera), so a thick coloured border reads clearly as a focus ring. */
 .globe-photo-marker--focused {
-  transform: scale(1.5); z-index: 2;
-  border-color: #ffcc00;
-  box-shadow: 0 0 0 4px #ffcc00, 0 0 16px 4px rgba(255, 204, 0, 0.9);
-  animation: marker-pulse 1s ease-in-out infinite;
+  transform: scale(1.65); z-index: 3;
+  border: 5px solid #00e5ff;
 }
-@keyframes marker-pulse {
-  0%, 100% { box-shadow: 0 0 0 4px #ffcc00, 0 0 12px 2px rgba(255, 204, 0, 0.7); }
-  50% { box-shadow: 0 0 0 6px #ffcc00, 0 0 22px 8px rgba(255, 204, 0, 1); }
+/* the animal whose card is currently open */
+.globe-photo-marker--selected,
+.globe-photo-marker--selected.globe-photo-marker--focused {
+  transform: scale(1.75); z-index: 4;
+  border: 6px solid #ffcc00;
 }
+/* the animals that the arrow keys will jump to next / previously */
+.globe-photo-marker--adjacent {
+  z-index: 2;
+  border: 4px solid rgba(0, 229, 255, 0.65);
+  opacity: 0.95;
+}
+
+/* name label sitting on the marker, only shown when it's focused */
+.globe-photo-marker__label {
+  display: none;
+  position: absolute; bottom: -34px; left: 50%; transform: translateX(-50%);
+  padding: 4px 12px; border-radius: 999px; white-space: nowrap;
+  background: rgba(0, 229, 255, 0.95); color: #06222a;
+  border: 2px solid #ffffff;
+  font-size: 0.8rem; font-weight: 700; text-align: center;
+  pointer-events: none; user-select: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.globe-photo-marker--focused .globe-photo-marker__label { display: block; }
 
 /* kid-friendly keyboard hint at the bottom of the globe */
 .globe-hint {

@@ -74,6 +74,8 @@
   },
   "card": {
     "playSound": "▶ Пусни звук",
+    "stopSound": "■ Спри звук",
+    "playHint": "Натисни „P“ за пускане или спиране",
     "noSound": "Няма наличен звук",
     "photoCredit": "Снимка: {{attribution}}"
   },

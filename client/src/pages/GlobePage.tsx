@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
 import type { Animal } from "../types";
 import { getAnimals } from "../api/animals";
@@ -37,7 +37,20 @@ export default function GlobePage() {
         [animals]
     )
 
+    // the marker click handler lives inside a stable htmlElement callback (see below),
+    // so it reads the current markers from a ref instead of a stale closure
+    const animalMarkersRef = useRef(animalMarkers);
+    useEffect(() => { animalMarkersRef.current = animalMarkers; }, [animalMarkers]);
+
     const navigate = useNavigate();
+
+    // open an animal's card and keep keyboard focus in sync with it,
+    // so the focused (cyan) and selected (gold) marker are always the same animal
+    const openAnimal = useCallback((animal: Animal) => {
+        const index = animalMarkersRef.current.findIndex((a) => a.id === animal.id);
+        if (index >= 0) setFocusedIndex(index);
+        setSelectedAnimal(animal);
+    }, []);
 
     // keyboard controls for kids: arrows to move, Enter to open, Esc to close
     useEffect(() => {
@@ -100,13 +113,60 @@ export default function GlobePage() {
         }
     }, [focusedIndex, animalMarkers])
 
-    // highlight the focused marker
+    // highlight the focused marker plus the ones the arrows will jump to next/prev
     useEffect(() => {
+        const count = animalMarkers.length;
         const focusedId = animalMarkers[focusedIndex]?.id;
+        const nextId = focusedIndex >= 0 && count > 1
+            ? animalMarkers[(focusedIndex + 1) % count]?.id
+            : undefined;
+        const prevId = focusedIndex >= 0 && count > 1
+            ? animalMarkers[(focusedIndex - 1 + count) % count]?.id
+            : undefined;
         markerElsRef.current.forEach((el, id) => {
             el.classList.toggle('globe-photo-marker--focused', id === focusedId);
+            el.classList.toggle(
+                'globe-photo-marker--adjacent',
+                id !== focusedId && (id === nextId || id === prevId)
+            );
         });
     }, [focusedIndex, animalMarkers])
+
+    // highlight the marker whose card is currently open
+    useEffect(() => {
+        const selectedId = selectedAnimal?.id;
+        markerElsRef.current.forEach((el, id) => {
+            el.classList.toggle('globe-photo-marker--selected', id === selectedId);
+        });
+    }, [selectedAnimal, animalMarkers])
+
+    // build a marker element. Kept stable (useCallback) on purpose: three-globe
+    // tears down and rebuilds every marker whenever the htmlElement prop changes
+    // identity, which would orphan the refs our highlight effects mutate and make
+    // the focus/select rings and name label never show.
+    const renderMarker = useCallback((d: object) => {
+        const animal = d as Animal;
+        const el = document.createElement('div');
+        el.className = 'globe-photo-marker';
+        el.title = animal.commonName;
+        if (animal.photoUrl) {
+            const img = document.createElement('img');
+            img.src = animal.photoUrl;
+            img.alt = animal.commonName;
+            el.appendChild(img);
+        } else {
+            // fallback for animals without a photo
+            el.classList.add('globe-photo-marker--empty');
+        }
+        // name label that shows up when this marker is focused
+        const label = document.createElement('span');
+        label.className = 'globe-photo-marker__label';
+        label.textContent = animal.commonName;
+        el.appendChild(label);
+        el.onclick = () => openAnimal(animal);
+        markerElsRef.current.set(animal.id, el);
+        return el;
+    }, [openAnimal]);
 
     return (
         <>
@@ -131,24 +191,7 @@ export default function GlobePage() {
                 htmlLat="latitude"
                 htmlLng="longitude"
                 htmlAltitude={0.02}
-                htmlElement={(d) => {
-                    const animal = d as Animal;
-                    const el = document.createElement('div');
-                    el.className = 'globe-photo-marker';
-                    el.title = animal.commonName;
-                    if (animal.photoUrl) {
-                        const img = document.createElement('img');
-                        img.src = animal.photoUrl;
-                        img.alt = animal.commonName;
-                        el.appendChild(img);
-                    } else {
-                        // fallback for animals without a photo
-                        el.classList.add('globe-photo-marker--empty');
-                    }
-                    el.onclick = () => setSelectedAnimal(animal);
-                    markerElsRef.current.set(animal.id, el);
-                    return el;
-                }}
+                htmlElement={renderMarker}
             />
             <p className="globe-hint">{t('globe.hint')}</p>
             {selectedAnimal && (

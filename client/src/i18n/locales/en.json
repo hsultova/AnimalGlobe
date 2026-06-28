@@ -74,6 +74,8 @@
   },
   "card": {
     "playSound": "▶ Play Sound",
+    "stopSound": "■ Stop Sound",
+    "playHint": "Press \"P\" to play or stop",
     "noSound": "No sound available",
     "photoCredit": "Photo: {{attribution}}"
   },

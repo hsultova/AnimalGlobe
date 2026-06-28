@@ -22,7 +22,7 @@ export default function AnimalPage() {
   async function onLogout() { await logout(); navigate('/login') }
 
   return (
-    <div style={{ maxWidth: 760, margin: '40px auto', fontFamily: 'system-ui' }}>
+    <div style={{ height: '100vh', overflowY: 'auto', fontFamily: 'system-ui' }}>
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>{t('animals.title')}</h1>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
