@@ -2,11 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { searchImport, fetchSound, importAnimal } from '../api/import'
-import type { PhotoPreview, SoundPreview } from '../types'
+import type { AnimalGroup, PhotoPreview, SearchOptions, SoundPreview } from '../types'
+
+const GROUPS: AnimalGroup[] = ['Mammal', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Insect']
 
 export default function ImportPage() {
   const { t } = useTranslation()
   const [name, setName] = useState('')
+  const [options, setOptions] = useState<SearchOptions>({ perPage: 20, qualityGrade: 'research', sort: 'popular' })
   const [photos, setPhotos] = useState<PhotoPreview[] | null>(null)
   const [sound, setSound] = useState<SoundPreview | null>(null)
   const [loading, setLoading] = useState(false)
@@ -23,7 +26,7 @@ export default function ImportPage() {
     setPhotos(null)
     setSound(null)
     try {
-      const found = await searchImport(name.trim())
+      const found = await searchImport(name.trim(), options)
       setPhotos(found)
 
       // Load the optional sound in the background so the photo grid never waits on it.
@@ -87,6 +90,41 @@ export default function ImportPage() {
         />
         <button type="submit" disabled={loading}>{loading ? t('import.searching') : t('import.search')}</button>
       </form>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end', margin: '0 0 16px', padding: 12, background: '#f7f7f7', borderRadius: 8 }}>
+        <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12, color: '#555' }}>
+          {t('import.optResults')}
+          <select value={options.perPage} onChange={(e) => setOptions((o) => ({ ...o, perPage: Number(e.target.value) }))} style={{ padding: 6, marginTop: 4 }}>
+            {[10, 20, 30, 50].map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12, color: '#555' }}>
+          {t('import.optQuality')}
+          <select value={options.qualityGrade} onChange={(e) => setOptions((o) => ({ ...o, qualityGrade: e.target.value as SearchOptions['qualityGrade'] }))} style={{ padding: 6, marginTop: 4 }}>
+            <option value="research">{t('import.qualityResearch')}</option>
+            <option value="needs_id">{t('import.qualityNeedsId')}</option>
+            <option value="casual">{t('import.qualityCasual')}</option>
+            <option value="any">{t('import.qualityAny')}</option>
+          </select>
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12, color: '#555' }}>
+          {t('import.optSort')}
+          <select value={options.sort} onChange={(e) => setOptions((o) => ({ ...o, sort: e.target.value as SearchOptions['sort'] }))} style={{ padding: 6, marginTop: 4 }}>
+            <option value="popular">{t('import.sortPopular')}</option>
+            <option value="recent">{t('import.sortRecent')}</option>
+          </select>
+        </label>
+
+        <label style={{ display: 'flex', flexDirection: 'column', fontSize: 12, color: '#555' }}>
+          {t('import.optGroup')}
+          <select value={options.group ?? ''} onChange={(e) => setOptions((o) => ({ ...o, group: (e.target.value || undefined) as AnimalGroup | undefined }))} style={{ padding: 6, marginTop: 4 }}>
+            <option value="">{t('import.groupAny')}</option>
+            {GROUPS.map((g) => <option key={g} value={g}>{t(`groups.${g}`)}</option>)}
+          </select>
+        </label>
+      </div>
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
 

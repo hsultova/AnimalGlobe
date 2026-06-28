@@ -43,21 +43,41 @@ namespace Api.Controllers
 		};
 
 		// GET /api/import/search?name=lion — photo candidates from iNaturalist.
+		// Optional admin filters (perPage, qualityGrade, sort, group) tune the search.
 		// Sound is fetched separately (GET /sound) so it never blocks the photo grid.
 		[HttpGet("search")]
-		public async Task<ActionResult<IReadOnlyList<PhotoPreview>>> Search([FromQuery] string name, CancellationToken ct)
+		public async Task<ActionResult<IReadOnlyList<PhotoPreview>>> Search(
+			[FromQuery] string name,
+			[FromQuery] int? perPage,
+			[FromQuery] string? qualityGrade,
+			[FromQuery] string? sort,
+			[FromQuery] AnimalGroup? group,
+			CancellationToken ct)
 		{
 			if (string.IsNullOrWhiteSpace(name))
 			{
 				return BadRequest("Name is required.");
 			}
 
+			var options = new SearchOptions
+			{
+				PerPage = perPage ?? 20,
+				QualityGrade = string.IsNullOrWhiteSpace(qualityGrade) ? "research" : qualityGrade,
+				Sort = string.IsNullOrWhiteSpace(sort) ? "popular" : sort,
+				IconicTaxon = group is { } g ? INaturalistClient.IconicTaxonFor(g) : null,
+			};
+
+			// Fold the options into the cache key so distinct configurations don't
+			// collide on the same cached result.
+			var cacheKey = $"inat:{name.Trim().ToLowerInvariant()}|{options.ClampedPerPage}|" +
+				$"{options.QualityGrade.ToLowerInvariant()}|{options.Sort.ToLowerInvariant()}|{options.IconicTaxon}";
+
 			var photos = await cache.GetOrCreateAsync(
-				$"inat:{name.Trim().ToLowerInvariant()}",
+				cacheKey,
 				entry =>
 				{
 					entry.SetOptions(CacheOptions);
-					return inaturalistClient.SearchAsync(name, ct);
+					return inaturalistClient.SearchAsync(name, options, ct);
 				});
 
 			return Ok(photos ?? Array.Empty<PhotoPreview>());

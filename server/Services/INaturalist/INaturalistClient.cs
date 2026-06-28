@@ -4,6 +4,29 @@ using System.Text.Json;
 
 namespace Api.Services
 {
+	// Admin-tunable search parameters, set in the import UI before searching.
+	// Defaults reproduce the previous hardcoded behaviour.
+	public sealed class SearchOptions
+	{
+		// How many candidates to fetch. Clamped to [1, 50] — bigger pages mean a
+		// markedly heavier iNaturalist payload (the nested photo/taxon arrays add up).
+		public int PerPage { get; init; } = 20;
+
+		// research | needs_id | casual | any. "any" drops the grade filter entirely.
+		public string QualityGrade { get; init; } = "research";
+
+		// "popular": only faved observations, default order (best photos, lighter payload).
+		// "recent": newest observations first (order_by=observed_on). See SearchAsync for why
+		// we avoid order_by=votes.
+		public string Sort { get; init; } = "popular";
+
+		// Optional iNaturalist iconic-taxon class name (e.g. "Mammalia", "Aves") to
+		// disambiguate names that collide across groups. Null/empty = no group filter.
+		public string? IconicTaxon { get; init; }
+
+		public int ClampedPerPage => Math.Clamp(PerPage, 1, 50);
+	}
+
 	public sealed class PhotoPreview
 	{
 		public required string ThumbnailUrl { get; init; }   // square crop — stored marker
@@ -34,23 +57,46 @@ namespace Api.Services
 			_httpClient = httpClient;
 		}
 
-		public async Task<IReadOnlyList<PhotoPreview>> SearchAsync(string name, CancellationToken ct = default)
+		public async Task<IReadOnlyList<PhotoPreview>> SearchAsync(string name, SearchOptions? options = null, CancellationToken ct = default)
 		{
+			options ??= new SearchOptions();
+
 			var query = new Dictionary<string, string?>
 			{
 				["taxon_name"] = name,
 				["photos"] = "true",
 				["geo"] = "true",
-				["quality_grade"] = "research",
 				["photo_license"] = "cc0,cc-by,cc-by-nc",
-				["per_page"] = "20",
-				// Bias toward better photos: "popular=true" keeps only observations that
-				// have been faved (~6s / ~2MB). Avoid "order_by=votes" — sorting by faves
-				// drags in the most-engaged observations' huge nested arrays (~17MB / ~20s,
-				// which tripped the HttpClient retry timeout). Default ordering otherwise.
-				["popular"] = "true",
+				["per_page"] = options.ClampedPerPage.ToString(),
 				["order"] = "desc",
 			};
+
+			// "any" means no grade filter at all; otherwise pass the admin's choice through.
+			if (!string.Equals(options.QualityGrade, "any", StringComparison.OrdinalIgnoreCase))
+			{
+				query["quality_grade"] = options.QualityGrade;
+			}
+
+			// Sort. "popular=true" keeps only observations that have been faved
+			// (~6s / ~2MB) and uses default ordering — the best photos for the least
+			// payload. "recent" orders by observation date instead. Avoid order_by=votes:
+			// sorting by faves drags in the most-engaged observations' huge nested arrays
+			// (~17MB / ~20s, which tripped the HttpClient retry timeout).
+			if (string.Equals(options.Sort, "recent", StringComparison.OrdinalIgnoreCase))
+			{
+				query["order_by"] = "observed_on";
+			}
+			else
+			{
+				query["popular"] = "true";
+			}
+
+			// Optional group filter to disambiguate names that collide across taxa.
+			if (!string.IsNullOrWhiteSpace(options.IconicTaxon))
+			{
+				query["iconic_taxa"] = options.IconicTaxon;
+			}
+
 			var url = QueryHelpers.AddQueryString("observations", query);
 
 			var response = await _httpClient.GetFromJsonAsync<INatSearchResponse>(url, JsonOptions, ct);
@@ -98,6 +144,19 @@ namespace Api.Services
 		// .../photos/12345/square.jpg(?cachebuster) -> .../photos/12345/large.jpg(?...)
 		private static string ResizePhoto(string squareUrl, string size) =>
 			squareUrl.Replace("square.", size + ".");
+
+		// Our coarse AnimalGroup -> iNaturalist "iconic taxon" class name(s) for the
+		// iconic_taxa filter. Returns null for groups iNaturalist doesn't model 1:1.
+		public static string? IconicTaxonFor(AnimalGroup group) => group switch
+		{
+			AnimalGroup.Mammal => "Mammalia",
+			AnimalGroup.Bird => "Aves",
+			AnimalGroup.Reptile => "Reptilia",
+			AnimalGroup.Amphibian => "Amphibia",
+			AnimalGroup.Fish => "Actinopterygii,Chondrichthyes",
+			AnimalGroup.Insect => "Insecta",
+			_ => null,
+		};
 
 		// iNaturalist "iconic taxon" class name -> our coarse AnimalGroup.
 		private static AnimalGroup MapGroup(string? iconicTaxonName) => iconicTaxonName switch

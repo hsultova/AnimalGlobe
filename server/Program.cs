@@ -5,6 +5,7 @@ using Api.Services.XenoCanto;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Net;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,6 +37,12 @@ builder.Services.AddHttpClient<INaturalistClient>((provider, client) =>
 	// iNaturalist asks API consumers to identify themselves with a User-Agent.
 	client.DefaultRequestHeaders.UserAgent.ParseAdd("AnimalGlobe/1.0");
 })
+// The observations response is large (~2MB uncompressed). Ask for and transparently
+// decompress gzip/brotli so the ~3s transfer shrinks to a fraction of the bytes.
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+	AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Brotli | DecompressionMethods.Deflate,
+})
 // Photos are the critical path. Give each attempt a generous window so a slow
 // iNaturalist response isn't cancelled at the default 10s and retried into a
 // timeout storm; typical latency is ~3s.
@@ -50,6 +57,10 @@ builder.Services.AddHttpClient<XenoCantoClient>((provider, client) =>
 {
 	var options = provider.GetRequiredService<IOptions<XenoCantoOptions>>().Value;
 	client.BaseAddress = new Uri(options.BaseUrl);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+{
+	AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Brotli | DecompressionMethods.Deflate,
 })
 // Sound is an optional enrichment, so fail fast instead of letting a slow or
 // flaky Xeno-canto stall the import preview behind the default ~30s timeout.

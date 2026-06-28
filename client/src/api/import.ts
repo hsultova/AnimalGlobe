@@ -1,4 +1,4 @@
-import type { ImportRequest, PhotoPreview, SoundPreview } from '../types'
+import type { ImportRequest, PhotoPreview, SearchOptions, SoundPreview } from '../types'
 
 // always send the auth cookie
 const withCookie = (extra: RequestInit = {}): RequestInit => ({ credentials: 'include', ...extra })
@@ -7,8 +7,13 @@ const json = (body: unknown): RequestInit => ({
   body: JSON.stringify(body),
 })
 
-export async function searchImport(name: string): Promise<PhotoPreview[]> {
-  const response = await fetch(`/api/import/search?name=${encodeURIComponent(name)}`, withCookie())
+export async function searchImport(name: string, options?: SearchOptions): Promise<PhotoPreview[]> {
+  const params = new URLSearchParams({ name })
+  if (options?.perPage) params.set('perPage', String(options.perPage))
+  if (options?.qualityGrade) params.set('qualityGrade', options.qualityGrade)
+  if (options?.sort) params.set('sort', options.sort)
+  if (options?.group) params.set('group', options.group)
+  const response = await fetch(`/api/import/search?${params.toString()}`, withCookie())
   if (!response.ok) throw new Error(`Import search failed: API error ${response.status}`)
   return response.json()
 }

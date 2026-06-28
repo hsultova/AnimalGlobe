@@ -32,6 +32,14 @@ export interface AnimalVM {
 
 // --- Import preview (iNaturalist + Xeno-canto) ---
 
+// Admin-tunable search filters, sent to GET /api/import/search.
+export interface SearchOptions {
+  perPage?: number
+  qualityGrade?: 'research' | 'needs_id' | 'casual' | 'any'
+  sort?: 'popular' | 'recent'
+  group?: AnimalGroup
+}
+
 export interface PhotoPreview {
   thumbnailUrl: string
   mediumUrl: string
