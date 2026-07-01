@@ -1,0 +1,36 @@
+# Version control
+.git
+.gitignore
+
+# IDEs
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build outputs
+client/dist
+client/node_modules
+server/bin
+server/obj
+
+# Package managers
+*.lock
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Documentation
+README.md
+LICENSE
+
+# Node
+npm-debug.log
+yarn-error.log
