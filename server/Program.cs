@@ -103,6 +103,11 @@ using (var scope = app.Services.CreateScope())
 {
 	var services = scope.ServiceProvider;
 
+	// Apply any pending EF Core migrations so the schema exists before we touch it.
+	// On a fresh Postgres (e.g. Neon) the tables won't exist until this runs.
+	var db = services.GetRequiredService<AppDbContext>();
+	await db.Database.MigrateAsync();
+
 	// create the single admin if it doesn't exist
 	var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 	const string adminEmail = "admin@animalglobe.local";
@@ -111,7 +116,6 @@ using (var scope = app.Services.CreateScope())
 		var admin = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
 		await userManager.CreateAsync(admin, "Admin123!");
 	}
-	var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 }
 
 // Configure the HTTP request pipeline.
