@@ -100,7 +100,7 @@ environment variables / user secrets):
   migrations, and deployment.
 
 ## Deployed application
-[text](https://animalglobe.onrender.com/)
+[AnimalGlobe link](https://animalglobe.onrender.com/)
 
 ## License
 
