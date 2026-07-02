@@ -2,4 +2,5 @@
   <Folder Name="/server/">
     <Project Path="server/AnimalGlobe.csproj" />
   </Folder>
+  <Project Path="DataMigrator/DataMigrator.csproj" Id="0b75d600-cf23-4c29-b779-18b831785a6a" />
 </Solution>
