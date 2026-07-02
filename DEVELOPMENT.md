@@ -13,8 +13,6 @@ overview and end-user instructions, see the [README](README.md).
 - [Testing](#testing)
 - [Building for production](#building-for-production)
 - [Deployment](#deployment)
-- [Security notes](#security-notes)
-- [Troubleshooting](#troubleshooting)
 
 ## Prerequisites
 
