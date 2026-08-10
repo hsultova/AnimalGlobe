@@ -108,7 +108,7 @@ environment variables / user secrets):
 
 ## Deployed application
 
-[AnimalGlobe link](https://animalglobe.onrender.com/)
+[![Deployed on Render](https://img.shields.io/badge/deployed-render-46E3B7?logo=render)](https://animalglobe.onrender.com/)
 
 <img width="1700" height="909" alt="image" src="https://github.com/user-attachments/assets/2bc0e9f7-9f64-498f-8cdf-a178eb2313a4" />
 
