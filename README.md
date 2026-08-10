@@ -1,6 +1,6 @@
 # 🌍 AnimalGlobe
-![Server CI](https://github.com/{owner}/{repo}/actions/workflows/backend.yml/badge.svg)
-![Client CI](https://github.com/{owner}/{repo}/actions/workflows/frontend.yml/badge.svg)
+![Server CI](https://github.com/hsultova/AnimalGlobe/actions/workflows/backend.yml/badge.svg)
+![Client CI](https://github.com/hsultova/AnimalGlobe/actions/workflows/frontend.yml/badge.svg)
 
 [![Deployed on Render](https://img.shields.io/badge/deployed-render-46E3B7?logo=render)](https://animalglobe.onrender.com/)
 
