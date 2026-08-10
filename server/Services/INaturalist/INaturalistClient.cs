@@ -1,8 +1,8 @@
-﻿using Api.Models;
+﻿using AnimalGlobe.Models;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Json;
 
-namespace Api.Services
+namespace AnimalGlobe.Services
 {
 	// Admin-tunable search parameters, set in the import UI before searching.
 	// Defaults reproduce the previous hardcoded behaviour.

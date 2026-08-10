@@ -1,11 +1,11 @@
-using Api.Configuration;
-using Api.Services.XenoCanto;
+using AnimalGlobe.Configuration;
+using AnimalGlobe.Services.XenoCanto;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Api.Services
+namespace AnimalGlobe.Services.XenoCanto
 {
 	public sealed class SoundPreview
 	{

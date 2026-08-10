@@ -1,11 +1,12 @@
-using Api.Data;
-using Api.Models;
-using Api.Services;
+using AnimalGlobe.Data;
+using AnimalGlobe.Models;
+using AnimalGlobe.Services;
+using AnimalGlobe.Services.XenoCanto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace Api.Controllers
+namespace AnimalGlobe.Controllers
 {
 	// The preview the admin picked, sent back to persist as a draft animal.
 	public sealed class ImportRequest

@@ -1,4 +1,4 @@
-﻿namespace Api.Services
+﻿namespace AnimalGlobe.Services
 {
 	// Raw shapes from iNaturalist GET /v1/observations.
 	// Only the fields we consume — System.Text.Json ignores the rest.

@@ -1,4 +1,4 @@
-﻿namespace Api.Configuration
+﻿namespace AnimalGlobe.Configuration
 {
 	public class INaturalistOptions
 	{

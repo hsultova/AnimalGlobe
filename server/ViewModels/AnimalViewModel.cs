@@ -1,6 +1,6 @@
-﻿using Api.Models;
+﻿using AnimalGlobe.Models;
 
-namespace Api.ViewModels;
+namespace AnimalGlobe.ViewModels;
 
 public class AnimalViewModel
 {

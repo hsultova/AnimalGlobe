@@ -1,12 +1,12 @@
 ﻿using System.Linq.Expressions;
-using Api.Data;
-using Api.Models;
-using Api.ViewModels;
+using AnimalGlobe.Data;
+using AnimalGlobe.Models;
+using AnimalGlobe.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Api.Controllers;
+namespace AnimalGlobe.Controllers;
 
 [ApiController]
 [Authorize]

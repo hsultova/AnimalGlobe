@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Api.Services.XenoCanto
+namespace AnimalGlobe.Services.XenoCanto
 {
 	// Raw shapes from Xeno-canto GET /api/3/recordings.
 	// Only the fields we consume — System.Text.Json ignores the rest.

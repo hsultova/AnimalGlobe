@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Api.Controllers
+namespace AnimalGlobe.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]

@@ -1,6 +1,6 @@
-using Api.Models;
+using AnimalGlobe.Models;
 
-namespace Api.Data;
+namespace AnimalGlobe.Data;
 
 public static class DbSeeder
 {

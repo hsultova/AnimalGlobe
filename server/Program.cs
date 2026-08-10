@@ -1,6 +1,7 @@
-using Api.Configuration;
-using Api.Data;
-using Api.Services;
+using AnimalGlobe.Configuration;
+using AnimalGlobe.Data;
+using AnimalGlobe.Services;
+using AnimalGlobe.Services.XenoCanto;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

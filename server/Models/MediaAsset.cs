@@ -1,4 +1,4 @@
-namespace Api.Models;
+namespace AnimalGlobe.Models;
 
 public class MediaAsset
 {

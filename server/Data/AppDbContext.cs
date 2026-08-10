@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using Api.Models;
+using AnimalGlobe.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 
-namespace Api.Data;
+namespace AnimalGlobe.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<IdentityUser>(options)
 {
