@@ -126,10 +126,9 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
-if (!app.Environment.IsProduction())
-{
-	app.UseHttpsRedirection();
-}
+// The app binds a single plain-HTTP port (see UseUrls above): locally on 8080,
+// and in production behind Render's TLS-terminating proxy. There is no HTTPS
+// listener to redirect to, so HTTPS redirection is intentionally not used.
 
 app.UseAuthentication();
 app.UseAuthorization();
