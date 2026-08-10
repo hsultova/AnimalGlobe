@@ -1,5 +1,6 @@
 # 🌍 AnimalGlobe
 
+<img align="right" width="220" height="200" alt="image" src="https://github.com/user-attachments/assets/a44d66fc-90db-4bcb-aa7d-1b0f681fc9b7" />
 A playful web app for children: a rotatable 3D Earth with animals placed at their
 real living locations. Kids explore the globe, jump between animals with the arrow
 keys, and open a card to see a photo, a fun fact, and hear the animal's sound.
@@ -7,6 +8,8 @@ keys, and open a card to see a photo, a fun fact, and hear the animal's sound.
 An admin builds the collection behind a login — either by hand or by importing
 photos from [iNaturalist](https://www.inaturalist.org/) and sounds from
 [Xeno-canto](https://xeno-canto.org/) with a couple of clicks.
+
+<br clear="left"/>
 
 ---
 
@@ -100,7 +103,13 @@ environment variables / user secrets):
   migrations, and deployment.
 
 ## Deployed application
+
 [AnimalGlobe link](https://animalglobe.onrender.com/)
+
+<img width="1700" height="909" alt="image" src="https://github.com/user-attachments/assets/2bc0e9f7-9f64-498f-8cdf-a178eb2313a4" />
+
+<img width="730" height="745" alt="image" src="https://github.com/user-attachments/assets/1c971611-8050-41f6-8d4d-b5f28abba527" />
+
 
 ## License
 
