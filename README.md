@@ -1,7 +1,6 @@
 # 🌍 AnimalGlobe
 ![Server CI](https://github.com/hsultova/AnimalGlobe/actions/workflows/server.yml/badge.svg)
 ![Client CI](https://github.com/hsultova/AnimalGlobe/actions/workflows/client.yml/badge.svg)
-
 [![Deployed on Render](https://img.shields.io/badge/deployed-render-46E3B7?logo=render)](https://animalglobe.onrender.com/)
 
 <img align="right" width="220" height="200" alt="image" src="https://github.com/user-attachments/assets/a44d66fc-90db-4bcb-aa7d-1b0f681fc9b7" />
