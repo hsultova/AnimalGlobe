@@ -7,6 +7,7 @@ import AnimalCard from "../components/AnimalCard";
 import LanguageSwitcher from "../components/LanguageSwitcher";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import AnimalSearchBar from "../components/AnimalSearchBar";
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -84,23 +85,35 @@ export default function GlobePage() {
         return () => window.removeEventListener('resize', onResize);
     }, [])
 
-    //place only animals on with coordinates
+    // place only animals with coordinates on the globe
     const animalMarkers = useMemo(
         () => animals.filter((a) => a.latitude != null && a.longitude != null),
         [animals]
     )
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const filteredAnimalMarkers = useMemo(() => {
+        const normalizedQuery = searchQuery.trim().toLowerCase();
+        if (normalizedQuery === "") 
+            return animalMarkers;
+
+        return animalMarkers.filter((a) =>
+            a.commonName.toLowerCase().includes(normalizedQuery) ||
+            a.scientificName.toLowerCase().includes(normalizedQuery)
+        );
+    }, [animalMarkers, searchQuery]);
+
     // the marker click handler lives inside a stable htmlElement callback (see below),
     // so it reads the current markers from a ref instead of a stale closure
-    const animalMarkersRef = useRef(animalMarkers);
-    useEffect(() => { animalMarkersRef.current = animalMarkers; }, [animalMarkers]);
+    const filteredAnimalMarkersRef = useRef(filteredAnimalMarkers);
+    useEffect(() => { filteredAnimalMarkersRef.current = filteredAnimalMarkers; }, [filteredAnimalMarkers]);
 
     const navigate = useNavigate();
 
     // open an animal's card and keep keyboard focus in sync with it,
     // so the focused (cyan) and selected (gold) marker are always the same animal
     const openAnimal = useCallback((animal: Animal) => {
-        const index = animalMarkersRef.current.findIndex((a) => a.id === animal.id);
+        const index = filteredAnimalMarkersRef.current.findIndex((a) => a.id === animal.id);
         if (index >= 0) setFocusedIndex(index);
         setSelectedAnimal(animal);
     }, []);
@@ -117,30 +130,30 @@ export default function GlobePage() {
                 return;
             }
 
-            if (animalMarkers.length === 0) return;
+            if (filteredAnimalMarkers.length === 0) return;
 
             switch (e.key) {
                 case 'ArrowRight':
                     e.preventDefault();
-                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'right'));
+                    setFocusedIndex((i) => findNeighborInDirection(filteredAnimalMarkers, i, 'right'));
                     break;
                 case 'ArrowLeft':
                     e.preventDefault();
-                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'left'));
+                    setFocusedIndex((i) => findNeighborInDirection(filteredAnimalMarkers, i, 'left'));
                     break;
                 case 'ArrowUp':
                     e.preventDefault();
-                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'up'));
+                    setFocusedIndex((i) => findNeighborInDirection(filteredAnimalMarkers, i, 'up'));
                     break;
                 case 'ArrowDown':
                     e.preventDefault();
-                    setFocusedIndex((i) => findNeighborInDirection(animalMarkers, i, 'down'));
+                    setFocusedIndex((i) => findNeighborInDirection(filteredAnimalMarkers, i, 'down'));
                     break;
                 case 'Enter':
                 case ' ':
                     e.preventDefault();
                     if (focusedIndex >= 0) {
-                        setSelectedAnimal(animalMarkers[focusedIndex]);
+                        setSelectedAnimal(filteredAnimalMarkers[focusedIndex]);
                     }
                     break;
                 case 'Escape':
@@ -152,7 +165,7 @@ export default function GlobePage() {
 
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [selectedAnimal, animalMarkers, focusedIndex])
+    }, [selectedAnimal, filteredAnimalMarkers, focusedIndex])
 
     // spin the globe towards the focused animal and pause auto-rotation
     useEffect(() => {
@@ -160,7 +173,7 @@ export default function GlobePage() {
         if (!globe) return;
 
         const controls = globe.controls();
-        const target = animalMarkers[focusedIndex];
+        const target = filteredAnimalMarkers[focusedIndex];
         if (target) {
             controls.autoRotate = false;
             globe.pointOfView(
@@ -170,16 +183,16 @@ export default function GlobePage() {
         } else {
             controls.autoRotate = true;
         }
-    }, [focusedIndex, animalMarkers])
+    }, [focusedIndex, filteredAnimalMarkers])
 
     // highlight the focused marker plus the ones each arrow will jump to
     useEffect(() => {
-        const focusedId = animalMarkers[focusedIndex]?.id;
+        const focusedId = filteredAnimalMarkers[focusedIndex]?.id;
         const adjacentIds = new Set<number>();
         if (focusedIndex >= 0) {
             for (const direction of ['up', 'down', 'left', 'right'] as const) {
-                const index = findNeighborInDirection(animalMarkers, focusedIndex, direction);
-                if (index !== focusedIndex) adjacentIds.add(animalMarkers[index].id);
+                const index = findNeighborInDirection(filteredAnimalMarkers, focusedIndex, direction);
+                if (index !== focusedIndex) adjacentIds.add(filteredAnimalMarkers[index].id);
             }
         }
         markerElsRef.current.forEach((el, id) => {
@@ -189,7 +202,7 @@ export default function GlobePage() {
                 id !== focusedId && adjacentIds.has(id)
             );
         });
-    }, [focusedIndex, animalMarkers])
+    }, [focusedIndex, filteredAnimalMarkers])
 
     // highlight the marker whose card is currently open
     useEffect(() => {
@@ -197,7 +210,7 @@ export default function GlobePage() {
         markerElsRef.current.forEach((el, id) => {
             el.classList.toggle('globe-photo-marker--selected', id === selectedId);
         });
-    }, [selectedAnimal, animalMarkers])
+    }, [selectedAnimal, filteredAnimalMarkers])
 
     // build a marker element. Kept stable (useCallback) on purpose: three-globe
     // tears down and rebuilds every marker whenever the htmlElement prop changes
@@ -227,8 +240,29 @@ export default function GlobePage() {
         return el;
     }, [openAnimal]);
 
+    const handleSearch = useCallback((query: string) => {
+        const trimmedQuery = query.trim();
+        setSearchQuery(trimmedQuery);
+        setSelectedAnimal(null);
+
+        if (trimmedQuery === "") {
+            setFocusedIndex(-1);
+            return;
+        }
+
+        const matches = animalMarkers.filter((a) =>
+            a.commonName.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
+            a.scientificName.toLowerCase().includes(trimmedQuery.toLowerCase())
+        );
+
+        setFocusedIndex(matches.length > 0 ? 0 : -1);
+    }, [animalMarkers]);
+
     return (
         <>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <AnimalSearchBar onSearch={handleSearch} />
+            </div>
             <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, display: 'flex', gap: 8 }}>
                 <button onClick={() => navigate('/animals')}>{t('globe.animals')}</button>
                 <LanguageSwitcher />
@@ -246,7 +280,7 @@ export default function GlobePage() {
                     controls.autoRotateSpeed = 0.6
                 }}
                 // --- markers (small animal photos) ---
-                htmlElementsData={animalMarkers}
+                htmlElementsData={filteredAnimalMarkers}
                 htmlLat="latitude"
                 htmlLng="longitude"
                 htmlAltitude={0.02}
