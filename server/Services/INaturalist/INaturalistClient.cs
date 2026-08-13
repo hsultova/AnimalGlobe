@@ -43,21 +43,17 @@ namespace AnimalGlobe.Services
 		public required string SourceRef { get; init; }      // iNat observation id
 	}
 
-	public sealed class INaturalistClient
-	{
+	public sealed class INaturalistClient(HttpClient httpClient)
+    {
 		private static readonly JsonSerializerOptions JsonOptions = new()
 		{
 			PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
 			PropertyNameCaseInsensitive = true,
 		};
 
-		private readonly HttpClient _httpClient;
-		public INaturalistClient(HttpClient httpClient)
-		{
-			_httpClient = httpClient;
-		}
+		private readonly HttpClient _httpClient = httpClient;
 
-		public async Task<IReadOnlyList<PhotoPreview>> SearchAsync(string name, SearchOptions? options = null, CancellationToken ct = default)
+        public async Task<IReadOnlyList<PhotoPreview>> SearchAsync(string name, SearchOptions? options = null, CancellationToken ct = default)
 		{
 			options ??= new SearchOptions();
 
@@ -102,7 +98,7 @@ namespace AnimalGlobe.Services
 			var response = await _httpClient.GetFromJsonAsync<INatSearchResponse>(url, JsonOptions, ct);
 			if (response?.Results is null)
 			{
-				return Array.Empty<PhotoPreview>();
+				return [];
 			}
 
 			var previews = new List<PhotoPreview>(response.Results.Count);

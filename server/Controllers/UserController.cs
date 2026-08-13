@@ -7,18 +7,12 @@ namespace AnimalGlobe.Controllers
 {
 	[ApiController]
 	[Route("api/[controller]")]
-	public class UserController : ControllerBase
+	public class UserController(
+		SignInManager<IdentityUser> signInManager,
+		UserManager<IdentityUser> userManager) : ControllerBase
 	{
-		private readonly SignInManager<IdentityUser> _signInManager;
-		private readonly UserManager<IdentityUser> _userManager;
-
-		public UserController(
-			SignInManager<IdentityUser> signInManager,
-			UserManager<IdentityUser> userManager)
-		{
-			_signInManager = signInManager;
-			_userManager = userManager;
-		}
+		private readonly SignInManager<IdentityUser> _signInManager = signInManager;
+		private readonly UserManager<IdentityUser> _userManager = userManager;
 
 		// POST /api/user/login
 		[HttpPost("login")]

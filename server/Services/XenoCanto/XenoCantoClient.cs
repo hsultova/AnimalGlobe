@@ -1,5 +1,4 @@
 using AnimalGlobe.Configuration;
-using AnimalGlobe.Services.XenoCanto;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
@@ -15,7 +14,7 @@ namespace AnimalGlobe.Services.XenoCanto
 		public required string SourceRef { get; init; }      // Xeno-canto recording id
 	}
 
-	public sealed class XenoCantoClient
+	public sealed class XenoCantoClient(HttpClient httpClient, IOptions<XenoCantoOptions> options, ILogger<XenoCantoClient> logger)
 	{
 		private static readonly JsonSerializerOptions JsonOptions = new()
 		{
@@ -26,16 +25,9 @@ namespace AnimalGlobe.Services.XenoCanto
 			NumberHandling = JsonNumberHandling.AllowReadingFromString,
 		};
 
-		private readonly HttpClient _httpClient;
-		private readonly string _apiKey;
-		private readonly ILogger<XenoCantoClient> _logger;
-
-		public XenoCantoClient(HttpClient httpClient, IOptions<XenoCantoOptions> options, ILogger<XenoCantoClient> logger)
-		{
-			_httpClient = httpClient;
-			_apiKey = options.Value.ApiKey;
-			_logger = logger;
-		}
+		private readonly HttpClient _httpClient = httpClient;
+		private readonly string _apiKey = options.Value.ApiKey;
+		private readonly ILogger<XenoCantoClient> _logger = logger;
 
 		// Best-effort: returns the top recording for a species, or null when no key is
 		// configured, the species has no recordings, or the API call fails. Sound is an

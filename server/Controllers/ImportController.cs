@@ -81,7 +81,7 @@ namespace AnimalGlobe.Controllers
 					return inaturalistClient.SearchAsync(name, options, ct);
 				});
 
-			return Ok(photos ?? Array.Empty<PhotoPreview>());
+			return Ok(photos ?? []);
 		}
 
 		// GET /api/import/sound?scientificName=Panthera%20leo — optional sound for a species.

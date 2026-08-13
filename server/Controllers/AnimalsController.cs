@@ -1,10 +1,10 @@
-﻿using System.Linq.Expressions;
-using AnimalGlobe.Data;
+﻿using AnimalGlobe.Data;
 using AnimalGlobe.Models;
 using AnimalGlobe.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace AnimalGlobe.Controllers;
 
@@ -28,9 +28,9 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 		PhotoUrl = a.Media.Where(m => m.Kind == MediaKind.Photo).Select(m => m.Url).FirstOrDefault(),
 		PhotoAttribution = a.Media.Where(m => m.Kind == MediaKind.Photo).Select(m => m.Attribution).FirstOrDefault(),
 		SoundUrl = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Url).FirstOrDefault(),
-        SoundAttribution = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Attribution).FirstOrDefault(),
-        IsPublished = a.IsPublished
-    };
+		SoundAttribution = a.Media.Where(m => m.Kind == MediaKind.Sound).Select(m => m.Attribution).FirstOrDefault(),
+		IsPublished = a.IsPublished
+	};
 
 	// GET: api/animals — only published animals, for public consumption
 	[HttpGet]
@@ -54,7 +54,7 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 	public async Task<ActionResult<AnimalViewModel>> GetById(int id)
 	{
 		var animal = await _db.Animals.Where(a => a.Id == id).Select(animalVM).FirstOrDefaultAsync();
-		return animal is null ? NotFound() : animal;
+		return animal ?? (ActionResult<AnimalViewModel>)NotFound();
 	}
 
 	// POST /api/animals — create as a DRAFT (unpublished)
@@ -68,7 +68,8 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 			Group = animalVM.Group,
 			ShortFact = animalVM.ShortFact,
 			IsPublished = false,
-			Locations = { new AnimalLocation { Latitude = animalVM.Latitude,
+			Locations = { new AnimalLocation {
+				Latitude = animalVM.Latitude,
 				Longitude = animalVM.Longitude,
 				PlaceLabel = animalVM.PlaceLabel
 			}},
@@ -141,7 +142,12 @@ public class AnimalsController(AppDbContext db) : ControllerBase
 		if (location is null)
 		{
 			animal.Locations.Add(
-				new AnimalLocation { Latitude = animalVm.Latitude, Longitude = animalVm.Longitude, PlaceLabel = animalVm.PlaceLabel });
+				new AnimalLocation
+				{
+					Latitude = animalVm.Latitude,
+					Longitude = animalVm.Longitude,
+					PlaceLabel = animalVm.PlaceLabel
+				});
 		}
 		else
 		{

@@ -21,10 +21,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 	opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
-{
-	options.Password.RequireNonAlphanumeric = false;
-})
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => options.Password.RequireNonAlphanumeric = false)
 	.AddEntityFrameworkStores<AppDbContext>()
 	.AddDefaultTokenProviders();
 
