@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import { useTranslation } from "react-i18next";
-import type { Animal } from "../types";
+import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import type { Animal } from '../types';
 
 type Props = { animal: Animal; onClose: () => void }
 

@@ -98,5 +98,8 @@
     "label": "Language",
     "en": "English",
     "bg": "Български"
+  },
+  "search": {
+    "placeholder": "Search for an animal..."
   }
 }

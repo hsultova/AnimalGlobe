@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import { isLoggedIn } from "../api/auth";
-import { Navigate } from "react-router-dom";
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { isLoggedIn } from '../api/auth';
+import { Navigate } from 'react-router-dom';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()

@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { GlobeMethods } from "react-globe.gl";
-import type { Animal } from "../types";
-import { getAnimals } from "../api/animals";
-import Globe from "react-globe.gl";
-import AnimalCard from "../components/AnimalCard";
-import LanguageSwitcher from "../components/LanguageSwitcher";
-import { useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import AnimalSearchBar from "../components/AnimalSearchBar";
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import type { GlobeMethods } from 'react-globe.gl';
+import type { Animal } from '../types';
+import Globe from 'react-globe.gl';
+import { getAnimals } from '../api/animals';
+import AnimalCard from '../components/AnimalCard';
+import AnimalSearchBar from '../components/AnimalSearchBar';
+import LanguageSwitcher from '../components/LanguageSwitcher';
 
 type Direction = 'up' | 'down' | 'left' | 'right';
 
@@ -91,10 +91,10 @@ export default function GlobePage() {
         [animals]
     )
 
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState('');
     const filteredAnimalMarkers = useMemo(() => {
         const normalizedQuery = searchQuery.trim().toLowerCase();
-        if (normalizedQuery === "") 
+        if (normalizedQuery === '') 
             return animalMarkers;
 
         return animalMarkers.filter((a) =>
@@ -245,7 +245,7 @@ export default function GlobePage() {
         setSearchQuery(trimmedQuery);
         setSelectedAnimal(null);
 
-        if (trimmedQuery === "") {
+        if (trimmedQuery === '') {
             setFocusedIndex(-1);
             return;
         }

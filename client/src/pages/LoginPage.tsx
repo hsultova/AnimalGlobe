@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { useTranslation } from "react-i18next"
-import { login } from "../api/auth"
-import LanguageSwitcher from "../components/LanguageSwitcher"
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import { login } from '../api/auth'
+import LanguageSwitcher from '../components/LanguageSwitcher'
 
 export default function LoginPage() {
   const { t } = useTranslation()

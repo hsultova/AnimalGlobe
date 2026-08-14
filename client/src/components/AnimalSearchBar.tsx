@@ -1,25 +1,25 @@
-import { useState, useEffect, useRef } from "react";
-import { Search, X, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from 'react';
+import { Search, X, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchBarProps {
   onSearch: (query: string) => void | Promise<void>;
   placeholder?: string;
 }
 
-export default function AnimalSearchBar({
-  onSearch,
-  placeholder = "Search for an animal...",
-}: SearchBarProps) {
-  const [query, setQuery] = useState("");
+const { t } = useTranslation();
+
+export default function AnimalSearchBar({ onSearch, placeholder = t('search.placeholder'), }: SearchBarProps) {
+  const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Debounce: wait 300ms after typing stops before searching
   useEffect(() => {
-    if (query.trim() === "") {
+    if (query.trim() === '') {
       setIsLoading(false);
-      onSearch("");
+      onSearch('');
       return;
     }
 
@@ -33,7 +33,7 @@ export default function AnimalSearchBar({
   }, [query, onSearch]);
 
   const clear = () => {
-    setQuery("");
+    setQuery('');
     inputRef.current?.focus();
   };
 
