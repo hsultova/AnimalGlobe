@@ -7,9 +7,8 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-const { t } = useTranslation();
-
-export default function AnimalSearchBar({ onSearch, placeholder = t('search.placeholder'), }: SearchBarProps) {
+export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,33 +36,51 @@ export default function AnimalSearchBar({ onSearch, placeholder = t('search.plac
     inputRef.current?.focus();
   };
 
+  const filterByGroup = (group: string, toggled: boolean) => {
+    if (toggled) {
+      onSearch(group);
+      inputRef.current?.focus();
+    }
+    else {
+      onSearch('');
+    }
+  };
+
   return (
-    <div className={`search-bar ${isFocused ? "search-bar--focused" : ""}`}>
-      <Search size={18} className="search-bar__icon" />
+    <div>
+      <div className={`search-bar ${isFocused ? "search-bar--focused" : ""}`}>
+        <Search size={18} className="search-bar__icon" />
 
-      <input
-        ref={inputRef}
-        type="text"
-        value={query}
-        placeholder={placeholder}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        onKeyDown={(e) => e.key === "Escape" && clear()}
-        className="search-bar__input"
-      />
+        <input
+          ref={inputRef}
+          type="text"
+          value={query}
+          placeholder={placeholder}
+          onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          onKeyDown={(e) => e.key === "Escape" && clear()}
+          className="search-bar__input"
+        />
 
-      {isLoading && <Loader2 size={16} className="search-bar__spinner" />}
+        {isLoading && <Loader2 size={16} className="search-bar__spinner" />}
 
-      {!isLoading && query && (
-        <button
-          onClick={clear}
-          aria-label="Clear search"
-          className="search-bar__clear"
-        >
-          <X size={16} />
-        </button>
-      )}
+        {!isLoading && query && (
+          <button
+            onClick={clear}
+            aria-label="Clear search"
+            className="search-bar__clear"
+          >
+            <X size={16} />
+          </button>
+        )}
+
+      </div>
+
+      <label htmlFor="searchMammal" className="sr-only">
+        <input type="checkbox" id="searchMammal" name="Mammal" onChange={(e) => filterByGroup(e.target.name, e.target.checked)} />
+        {t('groups.Mammal')}
+      </label>
     </div>
   );
 }

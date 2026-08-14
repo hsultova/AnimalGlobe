@@ -94,12 +94,13 @@ export default function GlobePage() {
     const [searchQuery, setSearchQuery] = useState('');
     const filteredAnimalMarkers = useMemo(() => {
         const normalizedQuery = searchQuery.trim().toLowerCase();
-        if (normalizedQuery === '') 
+        if (normalizedQuery === '')
             return animalMarkers;
 
         return animalMarkers.filter((a) =>
             a.commonName.toLowerCase().includes(normalizedQuery) ||
-            a.scientificName.toLowerCase().includes(normalizedQuery)
+            a.scientificName.toLowerCase().includes(normalizedQuery) ||
+            a.group.toLowerCase().includes(normalizedQuery)
         );
     }, [animalMarkers, searchQuery]);
 
@@ -252,7 +253,8 @@ export default function GlobePage() {
 
         const matches = animalMarkers.filter((a) =>
             a.commonName.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
-            a.scientificName.toLowerCase().includes(trimmedQuery.toLowerCase())
+            a.scientificName.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
+            a.group.toLowerCase().includes(trimmedQuery.toLowerCase())
         );
 
         setFocusedIndex(matches.length > 0 ? 0 : -1);
@@ -261,7 +263,7 @@ export default function GlobePage() {
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                <AnimalSearchBar onSearch={handleSearch} />
+                <AnimalSearchBar onSearch={handleSearch} placeholder={t('search.placeholder')} />
             </div>
             <div style={{ position: 'absolute', top: 8, left: 8, zIndex: 1, display: 'flex', gap: 8 }}>
                 <button onClick={() => navigate('/animals')}>{t('globe.animals')}</button>
