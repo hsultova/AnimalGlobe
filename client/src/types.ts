@@ -1,5 +1,16 @@
 export type AnimalGroup = | 'Mammal' | 'Bird' | 'Reptile' | 'Amphibian' | 'Fish' | 'Insect' | 'Other';
 
+export const GROUPS = ['Mammal', 'Bird', 'Reptile', 'Amphibian', 'Fish', 'Insect', 'Other'] as const;
+export const GROUP_LABEL_KEYS = {
+  Mammal: 'groups.Mammal',
+  Bird: 'groups.Bird',  
+  Reptile: 'groups.Reptile',
+  Amphibian: 'groups.Amphibian',
+  Fish: 'groups.Fish',
+  Insect: 'groups.Insect',
+  Other: 'groups.Other',
+} as const satisfies Record<AnimalGroup, string>;
+
 export interface Animal {
   id: number;
   commonName: string;

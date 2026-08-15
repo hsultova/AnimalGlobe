@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Search, X, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { GROUP_LABEL_KEYS, GROUPS, type AnimalGroup } from '../types';
 
 interface SearchBarProps {
   onSearch: (query: string) => void | Promise<void>;
@@ -12,6 +13,7 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<AnimalGroup | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Debounce: wait 300ms after typing stops before searching
@@ -36,26 +38,31 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
     inputRef.current?.focus();
   };
 
-  const filterByGroup = (group: string, toggled: boolean) => {
-    if (toggled) {
-      onSearch(group);
-      inputRef.current?.focus();
-    }
-    else {
+  const filterByGroup = (group: AnimalGroup) => {
+    const isDeselecting = selectedGroup === group;
+
+    if (isDeselecting) {
+      setSelectedGroup(null);
       onSearch('');
+    } else {
+      setSelectedGroup(group);
+      setQuery(''); // clear text search, since group filter takes over
+      onSearch(group);
     }
+
+    inputRef.current?.focus();
   };
 
   return (
     <div>
       <div className={`search-bar ${isFocused ? "search-bar--focused" : ""}`}>
-        <Search size={18} className="search-bar__icon" />
+        <Search size={18} className="search-icon"  />
 
         <input
           ref={inputRef}
           type="text"
           value={query}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t('search.placeholder')}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
@@ -68,7 +75,7 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
         {!isLoading && query && (
           <button
             onClick={clear}
-            aria-label="Clear search"
+            aria-label={t('search.clear')}
             className="search-bar__clear"
           >
             <X size={16} />
@@ -77,10 +84,19 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
 
       </div>
 
-      <label htmlFor="searchMammal" className="sr-only">
-        <input type="checkbox" id="searchMammal" name="Mammal" onChange={(e) => filterByGroup(e.target.name, e.target.checked)} />
-        {t('groups.Mammal')}
-      </label>
+      <div className="group-chips" role="group" aria-label={t('search.filterByGroup')}>
+      {GROUPS.map((group) => (
+        <button
+          key={group}
+          type="button"
+          aria-pressed={selectedGroup === group}
+          onClick={() => filterByGroup(group)}
+          className={selectedGroup === group ? 'chip chip-active' : 'chip'}
+        >
+          {t(GROUP_LABEL_KEYS[group])}
+        </button>
+      ))}
+    </div>
     </div>
   );
 }

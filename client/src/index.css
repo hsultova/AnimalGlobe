@@ -1,6 +1,8 @@
 * { box-sizing: border-box; }
 html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidden; }
+:root { font-family: system-ui, sans-serif; }
 
+/* ===== Overlay / animal card ===== */
 .overlay {
   position: fixed; inset: 0; display: grid; place-items: center;
   background: rgba(0, 0, 0, 0.5);
@@ -27,7 +29,7 @@ html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidd
 .play-hint { font-size: 0.8rem; color: #888; margin-top: 6px; }
 .credit { font-size: 0.75rem; color: #888; margin-top: 12px; }
 
-/* small animal photo markers on the globe */
+/* ===== Globe photo markers ===== */
 .globe-photo-marker {
   position: relative;
   width: 68px; height: 68px; cursor: pointer;
@@ -84,88 +86,149 @@ html, body, #root { margin: 0; height: 100%; background: #e5e6eb; overflow: hidd
   pointer-events: none; user-select: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
-:root { font-family: system-ui, sans-serif; }
 
+/* ===== Table ===== */
 table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
 th, td { text-align: left; padding: .5rem; border-bottom: 1px solid #ddd; }
 td button, td a { margin-right: .5rem; }
 
+/* ===== Top bar / header ===== */
+.top-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  background: #e9eaee;
+}
+
+.top-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+/* ===== Search bar ===== */
 .search-bar {
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 100%;
-  max-width: 400px;
-  padding: 10px 16px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 999px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
- 
-.search-bar:hover {
-  border-color: #cbd5e1;
+
+.search-bar-focused {
+  border-color: #4f8cff;
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
 }
- 
-.search-bar--focused {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.12);
-}
- 
-.search-bar__icon {
-  flex-shrink: 0;
-  color: #94a3b8;
-  transition: color 0.2s ease;
-}
- 
-.search-bar--focused .search-bar__icon {
-  color: #6366f1;
-}
- 
-.search-bar__input {
-  width: 100%;
+
+.search-bar input {
+  flex: 1;
   border: none;
   outline: none;
+  font-size: 15px;
   background: transparent;
-  font-size: 14px;
-  color: #1e293b;
 }
- 
-.search-bar__input::placeholder {
-  color: #94a3b8;
+
+.search-bar input::placeholder {
+  color: #999;
 }
- 
-.search-bar__spinner {
-  flex-shrink: 0;
-  color: #94a3b8;
-  animation: search-bar-spin 0.8s linear infinite;
-}
- 
-.search-bar__clear {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding: 2px;
+
+/* Clear ("×") button inside search bar */
+.search-bar button {
   border: none;
   background: transparent;
-  color: #94a3b8;
-  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  color: #999;
   cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
   transition: background 0.15s ease, color 0.15s ease;
 }
- 
-.search-bar__clear:hover {
-  background: #f1f5f9;
-  color: #475569;
+
+.search-bar button:hover {
+  background: #f0f0f0;
+  color: #333;
 }
- 
-@keyframes search-bar-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+/* Loading spinner */
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ddd;
+  border-top-color: #4f8cff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ===== Group filter chips ===== */
+.group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 999px; /* pill shape */
+  background: #fff;
+  color: #444;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.chip:hover {
+  border-color: #4f8cff;
+  color: #4f8cff;
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chip-active {
+  background: #4f8cff;
+  border-color: #4f8cff;
+  color: #fff;
+}
+
+.chip-active:hover {
+  background: #3b7ae6;
+  color: #fff;
+}
+
+/* ===== Generic pill button / select (fallback style) ===== */
+button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  color: #444;
+  font-size: 14px;
+  cursor: pointer;
+}
+button:hover {
+  border-color: #4f8cff;
+  color: #4f8cff;
+}
+
+select {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 999px;
+  background: #fff;
+  color: #444;
+  font-size: 14px;
 }
