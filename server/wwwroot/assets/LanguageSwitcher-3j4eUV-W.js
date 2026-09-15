@@ -1,0 +1,1 @@
+import{n as e}from"./i18n-DhS_P-o2.js";import{t}from"./react-vendor-CiqirV4k.js";import{n,t as r}from"./index-Corz3gnw.js";var i=t();function a(){let{t,i18n:a}=e();return(0,i.jsx)(`select`,{"aria-label":t(`lang.label`),value:a.language,onChange:e=>n(e.target.value),children:r.map(e=>(0,i.jsx)(`option`,{value:e,children:t(`lang.${e}`)},e))})}export{a as t};
