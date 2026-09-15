@@ -113,6 +113,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.commonName')}
         <input
+          className="input"
           value={form.commonName}
           onChange={(e) => set('commonName', e.target.value)}
           required
@@ -121,6 +122,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.scientificName')}
         <input
+          className="input"
           value={form.scientificName}
           onChange={(e) => set('scientificName', e.target.value)}
         />
@@ -141,6 +143,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.funFact')}
         <input
+          className="input"
           value={form.shortFact}
           onChange={(e) => set('shortFact', e.target.value)}
         />
@@ -150,6 +153,7 @@ export default function AnimalFormPage() {
         <label style={{ flex: 1 }}>
           {t('form.latitude')}
           <input
+            className="input"
             type="number"
             step="any"
             value={form.latitude}
@@ -159,6 +163,7 @@ export default function AnimalFormPage() {
         <label style={{ flex: 1 }}>
           {t('form.longitude')}
           <input
+            className="input"
             type="number"
             step="any"
             value={form.longitude}
@@ -170,6 +175,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.placeLabel')}
         <input
+          className="input"
           value={form.placeLabel}
           onChange={(e) => set('placeLabel', e.target.value)}
         />
@@ -177,6 +183,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.photoUrl')}
         <input
+          className="input"
           value={form.photoUrl}
           onChange={(e) => set('photoUrl', e.target.value)}
         />
@@ -184,6 +191,7 @@ export default function AnimalFormPage() {
       <label>
         {t('form.soundUrl')}
         <input
+          className="input"
           value={form.soundUrl}
           onChange={(e) => set('soundUrl', e.target.value)}
         />

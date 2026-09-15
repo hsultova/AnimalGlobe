@@ -302,32 +302,36 @@ export default function GlobePage() {
 
   return (
     <>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-        }}
-      >
-        <AnimalSearchBar
-          onSearch={handleSearch}
-          placeholder={t('search.placeholder')}
-        />
-      </div>
-      <div
-        style={{
-          position: 'absolute',
-          top: 8,
-          left: 8,
-          zIndex: 1,
-          display: 'flex',
-          gap: 8,
-        }}
-      >
-        <button onClick={() => navigate('/animals')}>
-          {t('globe.animals')}
-        </button>
-        <LanguageSwitcher />
+      <div className="top-bar">
+        <div
+          className="top-bar-row"
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <AnimalSearchBar
+            onSearch={handleSearch}
+            placeholder={t('search.placeholder')}
+          />
+        </div>
+        <div
+          className="top-bar-row"
+          style={{
+            position: 'absolute',
+            top: 8,
+            left: 8,
+            zIndex: 1,
+            display: 'flex',
+            gap: 8,
+          }}
+        >
+          <button onClick={() => navigate('/animals')}>
+            {t('globe.animals')}
+          </button>
+          <LanguageSwitcher />
+        </div>
       </div>
       <Globe
         ref={globeRef}

@@ -58,7 +58,7 @@ export default function AnimalSearchBar({
 
   return (
     <div>
-      <div className={`search-bar ${isFocused ? 'search-bar--focused' : ''}`}>
+      <div className={`search-bar ${isFocused ? 'search-bar-focused' : ''}`}>
         <Search size={18} className="search-icon" />
 
         <input
@@ -73,7 +73,7 @@ export default function AnimalSearchBar({
           className="search-bar__input"
         />
 
-        {isLoading && <Loader2 size={16} className="search-bar__spinner" />}
+        {isLoading && <Loader2 size={16} className="spinner" />}
 
         {!isLoading && query && (
           <button
