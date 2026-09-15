@@ -8,7 +8,10 @@ interface SearchBarProps {
   placeholder?: string;
 }
 
-export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProps) {
+export default function AnimalSearchBar({
+  onSearch,
+  placeholder,
+}: SearchBarProps) {
   const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isFocused, setIsFocused] = useState(false);
@@ -55,8 +58,8 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
 
   return (
     <div>
-      <div className={`search-bar ${isFocused ? "search-bar--focused" : ""}`}>
-        <Search size={18} className="search-icon"  />
+      <div className={`search-bar ${isFocused ? 'search-bar--focused' : ''}`}>
+        <Search size={18} className="search-icon" />
 
         <input
           ref={inputRef}
@@ -66,7 +69,7 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          onKeyDown={(e) => e.key === "Escape" && clear()}
+          onKeyDown={(e) => e.key === 'Escape' && clear()}
           className="search-bar__input"
         />
 
@@ -81,22 +84,25 @@ export default function AnimalSearchBar({ onSearch, placeholder }: SearchBarProp
             <X size={16} />
           </button>
         )}
-
       </div>
 
-      <div className="group-chips" role="group" aria-label={t('search.filterByGroup')}>
-      {GROUPS.map((group) => (
-        <button
-          key={group}
-          type="button"
-          aria-pressed={selectedGroup === group}
-          onClick={() => filterByGroup(group)}
-          className={selectedGroup === group ? 'chip chip-active' : 'chip'}
-        >
-          {t(GROUP_LABEL_KEYS[group])}
-        </button>
-      ))}
-    </div>
+      <div
+        className="group-chips"
+        role="group"
+        aria-label={t('search.filterByGroup')}
+      >
+        {GROUPS.map((group) => (
+          <button
+            key={group}
+            type="button"
+            aria-pressed={selectedGroup === group}
+            onClick={() => filterByGroup(group)}
+            className={selectedGroup === group ? 'chip chip-active' : 'chip'}
+          >
+            {t(GROUP_LABEL_KEYS[group])}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

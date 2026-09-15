@@ -1,8 +1,8 @@
-import { useTranslation } from 'react-i18next'
-import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '../i18n'
+import { useTranslation } from 'react-i18next';
+import { changeLanguage, SUPPORTED_LANGUAGES, type Language } from '../i18n';
 
 export default function LanguageSwitcher() {
-  const { t, i18n } = useTranslation()
+  const { t, i18n } = useTranslation();
 
   return (
     <select
@@ -16,5 +16,5 @@ export default function LanguageSwitcher() {
         </option>
       ))}
     </select>
-  )
+  );
 }
