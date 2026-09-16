@@ -2,80 +2,23 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import type { GlobeMethods } from 'react-globe.gl';
-import type { Animal } from '../types';
+import {
+  GROUP_LABEL_KEYS,
+  GROUPS,
+  type Animal,
+  type AnimalGroup,
+} from '../types';
 import Globe from 'react-globe.gl';
-import { getAnimals } from '../api/animals';
 import AnimalCard from '../components/AnimalCard';
-import AnimalSearchBar from '../components/AnimalSearchBar';
 import LanguageSwitcher from '../components/LanguageSwitcher';
-
-type Direction = 'up' | 'down' | 'left' | 'right';
-
-// wrap a longitude difference into [-180, 180] so the date line isn't a wall
-function normalizeLngDelta(delta: number) {
-  return (((delta % 360) + 540) % 360) - 180;
-}
-
-// find the geographically nearest animal in a given compass direction.
-// up/down move along latitude, left/right along longitude. The chosen
-// candidate must actually lie in that direction; among those we pick the
-// closest, lightly penalizing sideways drift so we stay on a sensible line.
-function findNeighborInDirection(
-  animals: Animal[],
-  fromIndex: number,
-  direction: Direction,
-): number {
-  if (animals.length === 0) return fromIndex;
-  // nothing focused yet: first key press just lands on the first animal
-  if (fromIndex < 0) return 0;
-
-  const from = animals[fromIndex];
-  let best = -1;
-  let bestScore = Infinity;
-
-  animals.forEach((candidate, index) => {
-    if (index === fromIndex) return;
-
-    const dLat = candidate.latitude - from.latitude; // + = north
-    const dLng = normalizeLngDelta(candidate.longitude - from.longitude); // + = east
-
-    let primary: number;
-    let perpendicular: number;
-    switch (direction) {
-      case 'up':
-        primary = dLat;
-        perpendicular = dLng;
-        break;
-      case 'down':
-        primary = -dLat;
-        perpendicular = dLng;
-        break;
-      case 'right':
-        primary = dLng;
-        perpendicular = dLat;
-        break;
-      case 'left':
-        primary = -dLng;
-        perpendicular = dLat;
-        break;
-    }
-
-    if (primary <= 0) return; // candidate isn't in this direction
-
-    // forward distance plus a penalty for how far off-axis it sits
-    const score = primary + Math.abs(perpendicular) * 2;
-    if (score < bestScore) {
-      bestScore = score;
-      best = index;
-    }
-  });
-
-  // if there's no animal that way, stay put
-  return best >= 0 ? best : fromIndex;
-}
+import SearchBar from '../components/SearchBar';
+import { getAnimals } from '../api/animals';
+import { filterAnimals, findNeighborInDirection } from '../utils/globe';
+import { useGlobeKeyboardNavigation } from '../hooks/useGlobeKeyboardNavigation';
 
 export default function GlobePage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
   const [animals, setAnimals] = useState<Animal[]>([]);
   const [selectedAnimal, setSelectedAnimal] = useState<Animal | null>(null);
@@ -84,6 +27,13 @@ export default function GlobePage() {
     width: window.innerWidth,
     height: window.innerHeight,
   });
+
+  const [query, setQuery] = useState('');
+  const [group, setGroup] = useState<AnimalGroup | null>(null);
+  const groupFilters = GROUPS.map((g) => ({
+    value: g,
+    label: t(GROUP_LABEL_KEYS[g]),
+  }));
 
   // keep a handle on each marker element so we can highlight the focused one
   const markerElsRef = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -107,18 +57,28 @@ export default function GlobePage() {
     [animals],
   );
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const filteredAnimalMarkers = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (normalizedQuery === '') return animalMarkers;
+  const filteredAnimalMarkers = useMemo(
+    () => filterAnimals(animalMarkers, query, group),
+    [animalMarkers, query, group],
+  );
 
-    return animalMarkers.filter(
-      (a) =>
-        a.commonName.toLowerCase().includes(normalizedQuery) ||
-        a.scientificName.toLowerCase().includes(normalizedQuery) ||
-        a.group.toLowerCase().includes(normalizedQuery),
-    );
-  }, [animalMarkers, searchQuery]);
+  // One place that updates the filters and resets focus and the card.
+  // It uses the NEW values it receives, so it's never one click behind.
+  const applyFilters = (nextQuery: string, nextGroup: AnimalGroup | null) => {
+    setQuery(nextQuery);
+    setGroup(nextGroup);
+    setSelectedAnimal(null);
+
+    const isFiltering = nextQuery.trim() !== '' || nextGroup !== null;
+    const matches = filterAnimals(animalMarkers, nextQuery, nextGroup);
+    setFocusedIndex(isFiltering && matches.length > 0 ? 0 : -1);
+  };
+
+  const handleSearch = (nextQuery: string) => applyFilters(nextQuery, group);
+
+  // Selecting a chip clears the text (same as clearQueryOnFilter in the SearchBar)
+  const handleGroupChange = (nextGroup: AnimalGroup | null) =>
+    applyFilters(nextGroup ? '' : query, nextGroup);
 
   // the marker click handler lives inside a stable htmlElement callback (see below),
   // so it reads the current markers from a ref instead of a stale closure
@@ -126,8 +86,6 @@ export default function GlobePage() {
   useEffect(() => {
     filteredAnimalMarkersRef.current = filteredAnimalMarkers;
   }, [filteredAnimalMarkers]);
-
-  const navigate = useNavigate();
 
   // open an animal's card and keep keyboard focus in sync with it,
   // so the focused (cyan) and selected (gold) marker are always the same animal
@@ -139,62 +97,13 @@ export default function GlobePage() {
     setSelectedAnimal(animal);
   }, []);
 
-  // keyboard controls for kids: arrows to move, Enter to open, Esc to close
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      // when a card is open, the only key we care about is Esc to close it
-      if (selectedAnimal) {
-        if (e.key === 'Escape') {
-          e.preventDefault();
-          setSelectedAnimal(null);
-        }
-        return;
-      }
-
-      if (filteredAnimalMarkers.length === 0) return;
-
-      switch (e.key) {
-        case 'ArrowRight':
-          e.preventDefault();
-          setFocusedIndex((i) =>
-            findNeighborInDirection(filteredAnimalMarkers, i, 'right'),
-          );
-          break;
-        case 'ArrowLeft':
-          e.preventDefault();
-          setFocusedIndex((i) =>
-            findNeighborInDirection(filteredAnimalMarkers, i, 'left'),
-          );
-          break;
-        case 'ArrowUp':
-          e.preventDefault();
-          setFocusedIndex((i) =>
-            findNeighborInDirection(filteredAnimalMarkers, i, 'up'),
-          );
-          break;
-        case 'ArrowDown':
-          e.preventDefault();
-          setFocusedIndex((i) =>
-            findNeighborInDirection(filteredAnimalMarkers, i, 'down'),
-          );
-          break;
-        case 'Enter':
-        case ' ':
-          e.preventDefault();
-          if (focusedIndex >= 0) {
-            setSelectedAnimal(filteredAnimalMarkers[focusedIndex]);
-          }
-          break;
-        case 'Escape':
-          e.preventDefault();
-          setFocusedIndex(-1);
-          break;
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [selectedAnimal, filteredAnimalMarkers, focusedIndex]);
+  useGlobeKeyboardNavigation({
+    animals: filteredAnimalMarkers,
+    focusedIndex,
+    setFocusedIndex,
+    selectedAnimal,
+    setSelectedAnimal,
+  });
 
   // spin the globe towards the focused animal and pause auto-rotation
   useEffect(() => {
@@ -276,30 +185,6 @@ export default function GlobePage() {
     },
     [openAnimal],
   );
-
-  const handleSearch = useCallback(
-    (query: string) => {
-      const trimmedQuery = query.trim();
-      setSearchQuery(trimmedQuery);
-      setSelectedAnimal(null);
-
-      if (trimmedQuery === '') {
-        setFocusedIndex(-1);
-        return;
-      }
-
-      const matches = animalMarkers.filter(
-        (a) =>
-          a.commonName.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
-          a.scientificName.toLowerCase().includes(trimmedQuery.toLowerCase()) ||
-          a.group.toLowerCase().includes(trimmedQuery.toLowerCase()),
-      );
-
-      setFocusedIndex(matches.length > 0 ? 0 : -1);
-    },
-    [animalMarkers],
-  );
-
   return (
     <>
       <div className="top-bar">
@@ -311,9 +196,13 @@ export default function GlobePage() {
             alignItems: 'center',
           }}
         >
-          <AnimalSearchBar
+          <SearchBar
             onSearch={handleSearch}
-            placeholder={t('search.placeholder')}
+            filters={groupFilters}
+            selectedFilter={group}
+            onFilterChange={handleGroupChange}
+            clearQueryOnFilter={true}
+            filterLabel={t('search.filterByGroup')}
           />
         </div>
         <div
