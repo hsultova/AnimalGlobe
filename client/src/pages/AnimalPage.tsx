@@ -1,15 +1,40 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getAllAnimals, togglePublish, deleteAnimal } from '../api/animals';
 import { logout } from '../api/auth';
-import type { Animal } from '../types';
+import {
+  GROUP_LABEL_KEYS,
+  GROUPS,
+  type Animal,
+  type AnimalGroup,
+} from '../types';
 import LanguageSwitcher from '../components/LanguageSwitcher';
+import SearchBar from '../components/SearchBar';
+import { filterAnimals } from '../utils/globe';
 
 export default function AnimalPage() {
   const { t } = useTranslation();
   const [animals, setAnimals] = useState<Animal[]>([]);
   const navigate = useNavigate();
+  const [query, setQuery] = useState('');
+  const [group, setGroup] = useState<AnimalGroup | null>(null);
+  const groupFilters = GROUPS.map((g) => ({
+    value: g,
+    label: t(GROUP_LABEL_KEYS[g]),
+  }));
+
+  const filteredAnimals = useMemo(
+    () => filterAnimals(animals, query, group),
+    [animals, query, group],
+  );
+
+  const handleGroupChange = (nextGroup: AnimalGroup | null) => {
+    setGroup(nextGroup);
+    if (nextGroup) {
+      setQuery('');
+    }
+  };
 
   async function load() {
     setAnimals(await getAllAnimals());
@@ -33,18 +58,10 @@ export default function AnimalPage() {
   }
 
   return (
-    <div
-      style={{ height: '100vh', overflowY: 'auto', fontFamily: 'system-ui' }}
-    >
-      <header
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+    <div className="top-bar">
+      <header className="top-bar-row">
         <h1>{t('animals.title')}</h1>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <div>
           <LanguageSwitcher />
           <Link to="/animals/new">
             <button>{t('animals.new')}</button>
@@ -55,6 +72,19 @@ export default function AnimalPage() {
           <button onClick={onLogout}>{t('animals.logout')}</button>
         </div>
       </header>
+      <div
+        className="top-bar-row"
+        style={{ display: 'flex', justifyContent: 'center' }}
+      >
+        <SearchBar
+          onSearch={setQuery}
+          filters={groupFilters}
+          selectedFilter={group}
+          onFilterChange={handleGroupChange}
+          clearQueryOnFilter
+          filterLabel={t('search.filterByGroup')}
+        />
+      </div>
 
       <table width="100%" cellPadding={6}>
         <thead>
@@ -67,7 +97,7 @@ export default function AnimalPage() {
           </tr>
         </thead>
         <tbody>
-          {animals.map((a) => (
+          {filteredAnimals.map((a) => (
             <tr key={a.id}>
               <td>{a.commonName}</td>
               <td align="center">{t(`groups.${a.group}`)}</td>
