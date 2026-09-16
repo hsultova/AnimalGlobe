@@ -103,5 +103,10 @@
     "placeholder": "Search for an animal...",
     "filterByGroup": "Filter by animal group",
     "clear": "Clear search"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous page",
+    "next": "Next page"
   }
 }

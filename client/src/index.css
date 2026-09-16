@@ -53,6 +53,38 @@ textarea.input {
   cursor: not-allowed;
 }
 
+/* ===== Pagination ===== */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin: 24px 0;
+  flex-wrap: wrap;
+}
+
+.pagination__page,
+.pagination__arrow {
+  min-width: 36px;
+  height: 36px;
+  border-radius: 8px;
+}
+
+.pagination__page--active {
+  font-weight: 700;
+  background: #2563eb;
+  color: white;
+}
+
+.pagination__arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination__gap {
+  padding: 0 4px;
+}
+
 /* ===== Overlay / animal card ===== */
 .overlay {
   position: fixed;
@@ -237,6 +269,21 @@ td a {
   margin-right: 0.5rem;
 }
 
+/* ===== Page shell (full-height scrolling pages) ===== */
+.page {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.page__content {
+  padding: 20px 24px 40px;
+}
+
+.page > .top-bar {
+  position: sticky;
+  top: 0;
+}
+
 /* ===== Top bar / header ===== */
 .top-bar {
   position: relative;
@@ -244,8 +291,8 @@ td a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 40px 24px 20px;
+  gap: 5px;
+  padding: 20px 40px 20px;
   background: rgba(10, 14, 30, 0.6);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
