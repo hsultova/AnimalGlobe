@@ -1,3 +1,5 @@
+using System.Net;
+using System.Text.Json.Serialization;
 using AnimalGlobe.Configuration;
 using AnimalGlobe.Data;
 using AnimalGlobe.Services;
@@ -6,18 +8,15 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-using System.Net;
-using System.Text.Json.Serialization;
+using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 	opt.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 
@@ -120,8 +119,7 @@ using (var scope = app.Services.CreateScope())
 if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.MapScalarApiReference();
 }
 
 // The app binds a single plain-HTTP port (see UseUrls above): locally on 8080,
